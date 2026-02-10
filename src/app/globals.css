@@ -1,0 +1,354 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   E-LIBRARY POLITEKNIK DEWANTARA
+   Global Styles & Design System
+   ============================================ */
+
+@layer base {
+  :root {
+    /* Primary Colors */
+    --primary-50: #e6eef5;
+    --primary-100: #ccdcea;
+    --primary-200: #99b9d6;
+    --primary-300: #6696c1;
+    --primary-400: #3373ad;
+    --primary-500: #1e3a5f;
+    --primary-600: #182e4c;
+    --primary-700: #122339;
+    --primary-800: #0c1726;
+    --primary-900: #060c13;
+
+    /* Secondary Colors - Gold */
+    --secondary-50: #fdf8eb;
+    --secondary-100: #faf0d7;
+    --secondary-200: #f5e1af;
+    --secondary-300: #f0d287;
+    --secondary-400: #ebc35f;
+    --secondary-500: #d4a84b;
+    --secondary-600: #aa863c;
+    --secondary-700: #7f652d;
+    --secondary-800: #55431e;
+    --secondary-900: #2a220f;
+
+    /* Background */
+    --background: #f8fafc;
+    --background-secondary: #f1f5f9;
+    --foreground: #0f172a;
+    --card-background: #ffffff;
+
+    /* Glassmorphism */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+  }
+
+  .dark {
+    --background: #0f172a;
+    --background-secondary: #1e293b;
+    --foreground: #f8fafc;
+    --card-background: #1e293b;
+    --glass-bg: rgba(15, 23, 42, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[var(--background)] text-[var(--foreground)] antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  /* ============================================
+     BUTTONS
+     ============================================ */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 
+           rounded-xl font-semibold transition-all duration-300 
+           focus:outline-none focus:ring-2 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary-500 text-white hover:bg-primary-600 
+           focus:ring-primary-500 shadow-lg hover:shadow-xl 
+           hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply btn bg-secondary-500 text-primary-900 hover:bg-secondary-400 
+           focus:ring-secondary-500 shadow-lg hover:shadow-xl
+           hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-outline {
+    @apply btn bg-transparent border-2 border-primary-500 text-primary-500
+           hover:bg-primary-500 hover:text-white focus:ring-primary-500;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-primary-500 hover:bg-primary-50 
+           dark:hover:bg-primary-900/50;
+  }
+
+  /* ============================================
+     CARDS
+     ============================================ */
+  .card {
+    @apply bg-[var(--card-background)] rounded-2xl shadow-card 
+           transition-all duration-300 overflow-hidden;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-hover hover:-translate-y-1;
+  }
+
+  .card-glass {
+    @apply rounded-2xl backdrop-blur-xl 
+           bg-[var(--glass-bg)] border border-[var(--glass-border)]
+           shadow-glass;
+  }
+
+  /* ============================================
+     BOOK CARD
+     ============================================ */
+  .book-card {
+    @apply card-hover p-0 cursor-pointer;
+  }
+
+  .book-card .book-cover {
+    @apply relative aspect-[3/4] overflow-hidden bg-gray-100 dark:bg-gray-800;
+  }
+
+  .book-card .book-cover img {
+    @apply w-full h-full object-cover transition-transform duration-500
+           group-hover:scale-110;
+  }
+
+  .book-card .book-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent
+           opacity-0 group-hover:opacity-100 transition-opacity duration-300
+           flex items-end justify-center pb-4;
+  }
+
+  .book-card .book-info {
+    @apply p-4 space-y-2;
+  }
+
+  .book-card .book-title {
+    @apply font-semibold text-lg line-clamp-2 text-primary-900 dark:text-white
+           group-hover:text-primary-500 transition-colors;
+  }
+
+  .book-card .book-author {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+  }
+
+  /* ============================================
+     FORM INPUTS
+     ============================================ */
+  .input {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 
+           dark:border-gray-700 bg-white dark:bg-gray-800
+           text-gray-900 dark:text-white
+           placeholder:text-gray-400 dark:placeholder:text-gray-500
+           focus:outline-none focus:ring-2 focus:ring-primary-500 
+           focus:border-transparent transition-all duration-200;
+  }
+
+  .input-search {
+    @apply input pl-12 pr-4;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+  }
+
+  /* ============================================
+     BADGES
+     ============================================ */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply badge bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300;
+  }
+
+  .badge-secondary {
+    @apply badge bg-secondary-100 text-secondary-700 dark:bg-secondary-900/50 dark:text-secondary-400;
+  }
+
+  .badge-success {
+    @apply badge bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400;
+  }
+
+  .badge-warning {
+    @apply badge bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400;
+  }
+
+  /* ============================================
+     NAVIGATION
+     ============================================ */
+  .nav-link {
+    @apply relative px-4 py-2 text-gray-600 dark:text-gray-300 
+           font-medium hover:text-primary-500 dark:hover:text-primary-400
+           transition-colors duration-200;
+  }
+
+  .nav-link.active {
+    @apply text-primary-500 dark:text-primary-400;
+  }
+
+  .nav-link::after {
+    @apply content-[''] absolute bottom-0 left-1/2 w-0 h-0.5 
+           bg-primary-500 transition-all duration-300;
+    transform: translateX(-50%);
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    @apply w-full;
+  }
+
+  /* ============================================
+     HERO SECTION
+     ============================================ */
+  .hero-gradient {
+    @apply bg-gradient-to-br from-primary-700 via-primary-800 to-primary-900;
+  }
+
+  .hero-pattern {
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(212, 168, 75, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 40%),
+      radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 30%);
+  }
+
+  /* ============================================
+     SECTION HEADINGS
+     ============================================ */
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-primary-900 dark:text-white mb-4;
+  }
+
+  .section-subtitle {
+    @apply text-lg text-gray-600 dark:text-gray-400 max-w-2xl;
+  }
+
+  /* ============================================
+     GRID LAYOUTS
+     ============================================ */
+  .books-grid {
+    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6;
+  }
+
+  .categories-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
+  }
+
+  /* ============================================
+     ANIMATIONS
+     ============================================ */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0; 
+      transform: translateY(20px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  /* Stagger children animations */
+  .stagger-children > * {
+    @apply animate-slide-up;
+  }
+
+  .stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
+  .stagger-children > *:nth-child(6) { animation-delay: 0.6s; }
+
+  /* ============================================
+     SCROLLBAR
+     ============================================ */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full 
+           hover:bg-gray-400 dark:hover:bg-gray-500;
+  }
+
+  /* ============================================
+     LOADING SKELETON
+     ============================================ */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+  }
+
+  /* ============================================
+     CONTAINER
+     ============================================ */
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer utilities {
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent;
+  }
+}
