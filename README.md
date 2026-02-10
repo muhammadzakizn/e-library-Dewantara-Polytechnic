@@ -2,8 +2,7 @@
 
 Web Aplikasi Perpustakaan Digital Modern untuk Politeknik Dewantara, dirancang untuk memudahkan mahasiswa dan dosen dalam mengakses buku digital, jurnal, laporan magang, dan modul pembelajaran secara online.
 
-![Mockup](https://i.imgur.com/place-holder-mockup.png)
-*(Ganti dengan screenshot aplikasi Anda)*
+<img width="1470" height="803" alt="Screenshot 2026-02-10 at 1 56 06 PM" src="https://github.com/user-attachments/assets/7e990ed8-a9e3-4aae-b2ed-a5ea71a47e63" />
 
 ## 🚀 Fitur Utama
 
