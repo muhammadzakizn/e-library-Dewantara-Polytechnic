@@ -44,6 +44,7 @@ export default function Header() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [user, setUser] = useState<SupabaseUser | null>(null);
+    const [userRole, setUserRole] = useState<string | null>(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
@@ -73,13 +74,32 @@ export default function Header() {
         const getUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
+
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+                setUserRole(profile?.role || 'mahasiswa');
+            }
         };
 
         getUser();
 
         // Listen for auth state changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setUser(session?.user ?? null);
+            if (session?.user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', session.user.id)
+                    .single();
+                setUserRole(profile?.role || 'mahasiswa');
+            } else {
+                setUserRole(null);
+            }
         });
 
         return () => subscription.unsubscribe();
@@ -94,6 +114,7 @@ export default function Header() {
         const supabase = createClient();
         await supabase.auth.signOut();
         setUser(null);
+        setUserRole(null);
         setShowUserMenu(false);
         router.push('/');
     };
@@ -105,6 +126,7 @@ export default function Header() {
 
     const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
     const userAvatar = user?.user_metadata?.avatar_url || null;
+    const dashboardLink = (userRole === 'admin' || userRole === 'dosen') ? '/admin/dashboard' : '/dashboard';
 
     return (
         <header
@@ -237,7 +259,7 @@ export default function Header() {
                                                 <p className="text-xs text-gray-500 truncate">{user.email}</p>
                                             </div>
                                             <Link
-                                                href="/dashboard"
+                                                href={dashboardLink}
                                                 className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                                 onClick={() => setShowUserMenu(false)}
                                             >

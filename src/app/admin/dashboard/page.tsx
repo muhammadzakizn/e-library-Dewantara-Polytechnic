@@ -339,28 +339,25 @@ export default function AdminDashboard() {
         { key: 'jurusan', label: 'Kelola Jurusan', icon: GraduationCap, adminOnly: true },
         { key: 'akun', label: 'Kelola Akun', icon: Users, adminOnly: true },
         { key: 'laporan', label: 'Laporan Magang', icon: ClipboardCheck },
-        { key: 'pengaturan', label: 'Pengaturan', icon: Settings, adminOnly: true },
     ];
 
     const filteredSidebarItems = sidebarItems.filter(item => !item.adminOnly || isAdmin);
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex transition-colors duration-300">
             {/* Sidebar */}
-            <aside className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed inset-y-0 left-0 z-30">
-                <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                            <Shield className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="font-bold text-gray-900 dark:text-white text-sm">Admin Panel</h1>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">E-Library Politeknik</p>
-                        </div>
+            <aside className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed inset-y-0 left-0 z-50 transition-colors duration-300">
+                <div className="h-16 flex items-center gap-3 px-6 border-b border-gray-200 dark:border-gray-800">
+                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                        <Shield className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                        <h1 className="font-bold text-gray-900 dark:text-white text-sm leading-tight">Admin Panel</h1>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400">E-Library Politeknik</p>
                     </div>
                 </div>
 
-                <nav className="flex-1 p-4 space-y-1">
+                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {filteredSidebarItems.map(item => (
                         <button
                             key={item.key}
@@ -376,46 +373,25 @@ export default function AdminDashboard() {
                     ))}
                 </nav>
 
-                <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 text-sm font-bold">
-                            {currentProfile?.full_name?.[0] || 'A'}
+                <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
+                    <button
+                        onClick={() => router.push('/')}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    >
+                        <ChevronRight className="w-5 h-5 rotate-180" />
+                        Kembali ke Website
+                    </button>
+
+                    <div className="pt-2 mt-2 border-t border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center gap-3 px-2 mb-3">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 text-sm font-bold">
+                                {currentProfile?.full_name?.[0] || 'A'}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{currentProfile?.full_name || 'Admin'}</p>
+                                <p className="text-xs text-gray-500 capitalize">{currentProfile?.role}</p>
+                            </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{currentProfile?.full_name || 'Admin'}</p>
-                            <p className="text-xs text-gray-500 capitalize">{currentProfile?.role}</p>
-                        </div>
-                    </div>
-                    <div className="space-y-1">
-                        <button
-                            onClick={() => {
-                                if (currentProfile) {
-                                    setEditingAccount(currentProfile);
-                                    setEditAccountForm({
-                                        fullName: currentProfile.full_name || '',
-                                        username: currentProfile.username || '',
-                                        role: currentProfile.role,
-                                        jurusanId: currentProfile.jurusan_id || '',
-                                    });
-                                    setShowEditAccountModal(true);
-                                }
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                        >
-                            <UserCog className="w-4 h-4" /> Edit Profil
-                        </button>
-                        <button
-                            onClick={() => {
-                                if (currentProfile) {
-                                    setPasswordTarget(currentProfile);
-                                    setPasswordForm({ newPassword: '', confirmPassword: '' });
-                                    setShowPasswordModal(true);
-                                }
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                        >
-                            <KeyRound className="w-4 h-4" /> Ubah Password
-                        </button>
                         <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">
                             <LogOut className="w-4 h-4" /> Keluar
                         </button>
@@ -424,20 +400,35 @@ export default function AdminDashboard() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 ml-64">
+            <main className="flex-1 ml-64 min-h-screen flex flex-col">
+                {/* Admin Header */}
+                <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 px-8 flex items-center justify-between transition-colors duration-300">
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-lg font-semibold text-gray-800 dark:text-white capitalize">
+                            {sidebarItems.find(i => i.key === activeSection)?.label || 'Dashboard'}
+                        </h2>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        {/* Dark Mode Toggle - Simplified (Needs state from props or context, using simpler version here) */}
+                        <div className="text-xs text-gray-400">
+                            {new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        </div>
+                    </div>
+                </header>
+
                 {/* Top Notifications */}
                 {successMsg && (
-                    <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-in slide-in-from-top-2 duration-300">
+                    <div className="fixed top-20 right-8 z-50 bg-green-500 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-in slide-in-from-top-2 duration-300">
                         <CheckCircle2 className="w-5 h-5" /> {successMsg}
                     </div>
                 )}
                 {errorMsg && (
-                    <div className="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-in slide-in-from-top-2 duration-300">
+                    <div className="fixed top-20 right-8 z-50 bg-red-500 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-in slide-in-from-top-2 duration-300">
                         <AlertCircle className="w-5 h-5" /> {errorMsg}
                     </div>
                 )}
 
-                <div className="p-8">
+                <div className="p-8 flex-1 overflow-y-auto">
                     {/* ==================== BERANDA ==================== */}
                     {activeSection === 'beranda' && (
                         <div className="space-y-8">
@@ -837,6 +828,7 @@ export default function AdminDashboard() {
                                 <select className="input w-full" value={adminForm.role} onChange={e => setAdminForm(f => ({ ...f, role: e.target.value }))}>
                                     <option value="dosen">Dosen</option>
                                     <option value="admin">Administrator</option>
+                                    <option value="mahasiswa">Mahasiswa (Test)</option>
                                 </select>
                             </div>
                             {adminForm.role === 'dosen' && (
@@ -859,142 +851,149 @@ export default function AdminDashboard() {
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
 
             {/* Reject Modal */}
-            {showRejectModal && selectedLaporan && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl">
-                        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Tolak Laporan</h3>
-                            <p className="text-sm text-gray-500 mt-1">{selectedLaporan.title}</p>
-                        </div>
-                        <div className="p-6">
-                            <label className="text-sm font-medium block mb-2">Alasan Penolakan</label>
-                            <textarea className="input w-full h-32 resize-none" placeholder="Tuliskan alasan penolakan..." value={rejectReason} onChange={e => setRejectReason(e.target.value)} />
-                        </div>
-                        <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex gap-3 justify-end">
-                            <button onClick={() => { setShowRejectModal(false); setSelectedLaporan(null); }} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">Batal</button>
-                            <button onClick={handleRejectLaporan} disabled={actionLoading === selectedLaporan.id} className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
-                                {actionLoading === selectedLaporan.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
-                                Tolak Laporan
-                            </button>
+            {
+                showRejectModal && selectedLaporan && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl">
+                            <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Tolak Laporan</h3>
+                                <p className="text-sm text-gray-500 mt-1">{selectedLaporan.title}</p>
+                            </div>
+                            <div className="p-6">
+                                <label className="text-sm font-medium block mb-2">Alasan Penolakan</label>
+                                <textarea className="input w-full h-32 resize-none" placeholder="Tuliskan alasan penolakan..." value={rejectReason} onChange={e => setRejectReason(e.target.value)} />
+                            </div>
+                            <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex gap-3 justify-end">
+                                <button onClick={() => { setShowRejectModal(false); setSelectedLaporan(null); }} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">Batal</button>
+                                <button onClick={handleRejectLaporan} disabled={actionLoading === selectedLaporan.id} className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
+                                    {actionLoading === selectedLaporan.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+                                    Tolak Laporan
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Edit Account Modal */}
-            {showEditAccountModal && editingAccount && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl">
-                        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Profil Akun</h3>
-                            <p className="text-sm text-gray-500 mt-1">{editingAccount.email}</p>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <div>
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Nama Lengkap</label>
-                                <input type="text" className="input w-full" value={editAccountForm.fullName} onChange={e => setEditAccountForm(f => ({ ...f, fullName: e.target.value }))} />
+            {
+                showEditAccountModal && editingAccount && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl">
+                            <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Profil Akun</h3>
+                                <p className="text-sm text-gray-500 mt-1">{editingAccount.email}</p>
                             </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Username</label>
-                                <input type="text" className="input w-full" value={editAccountForm.username} onChange={e => setEditAccountForm(f => ({ ...f, username: e.target.value }))} />
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Role</label>
-                                <select className="input w-full" value={editAccountForm.role} onChange={e => setEditAccountForm(f => ({ ...f, role: e.target.value }))}>
-                                    <option value="dosen">Dosen</option>
-                                    <option value="admin">Administrator</option>
-                                </select>
-                            </div>
-                            {editAccountForm.role === 'dosen' && (
+                            <div className="p-6 space-y-4">
                                 <div>
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Jurusan</label>
-                                    <select className="input w-full" value={editAccountForm.jurusanId} onChange={e => setEditAccountForm(f => ({ ...f, jurusanId: e.target.value }))}>
-                                        <option value="">— Pilih Jurusan —</option>
-                                        {jurusanList.map(j => <option key={j.id} value={j.id}>{j.nama} ({j.jenjang})</option>)}
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Nama Lengkap</label>
+                                    <input type="text" className="input w-full" value={editAccountForm.fullName} onChange={e => setEditAccountForm(f => ({ ...f, fullName: e.target.value }))} />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Username</label>
+                                    <input type="text" className="input w-full" value={editAccountForm.username} onChange={e => setEditAccountForm(f => ({ ...f, username: e.target.value }))} />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Role</label>
+                                    <select className="input w-full" value={editAccountForm.role} onChange={e => setEditAccountForm(f => ({ ...f, role: e.target.value }))}>
+                                        <option value="dosen">Dosen</option>
+                                        <option value="admin">Administrator</option>
                                     </select>
                                 </div>
-                            )}
-                        </div>
-                        <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex gap-3 justify-end">
-                            <button onClick={() => { setShowEditAccountModal(false); setEditingAccount(null); }} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">Batal</button>
-                            <button onClick={handleEditAccount} disabled={actionLoading === 'editAccount'} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
-                                {actionLoading === 'editAccount' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                Simpan Perubahan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Change Password Modal */}
-            {showPasswordModal && passwordTarget && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl">
-                        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                <Lock className="w-5 h-5" /> Ubah Password
-                            </h3>
-                            <p className="text-sm text-gray-500 mt-1">{passwordTarget.full_name || passwordTarget.email}</p>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            {passwordTarget.id !== currentUser?.id && (
-                                <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-xl p-3">
-                                    <p className="text-xs text-yellow-700 dark:text-yellow-400">⚠️ Untuk mengubah password user lain, gunakan Supabase Dashboard → Authentication → Users</p>
-                                </div>
-                            )}
-                            <div>
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Password Baru</label>
-                                <div className="relative">
-                                    <input
-                                        type={showNewPassword ? 'text' : 'password'}
-                                        className="input w-full pr-10"
-                                        placeholder="Min. 6 karakter"
-                                        value={passwordForm.newPassword}
-                                        onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
-                                        disabled={passwordTarget.id !== currentUser?.id}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowNewPassword(!showNewPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                    >
-                                        {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Konfirmasi Password Baru</label>
-                                <input
-                                    type="password"
-                                    className="input w-full"
-                                    placeholder="Ketik ulang password baru"
-                                    value={passwordForm.confirmPassword}
-                                    onChange={e => setPasswordForm(f => ({ ...f, confirmPassword: e.target.value }))}
-                                    disabled={passwordTarget.id !== currentUser?.id}
-                                />
-                                {passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword && (
-                                    <p className="text-xs text-red-500 mt-1">Password tidak cocok</p>
+                                {editAccountForm.role === 'dosen' && (
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Jurusan</label>
+                                        <select className="input w-full" value={editAccountForm.jurusanId} onChange={e => setEditAccountForm(f => ({ ...f, jurusanId: e.target.value }))}>
+                                            <option value="">— Pilih Jurusan —</option>
+                                            {jurusanList.map(j => <option key={j.id} value={j.id}>{j.nama} ({j.jenjang})</option>)}
+                                        </select>
+                                    </div>
                                 )}
                             </div>
-                        </div>
-                        <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex gap-3 justify-end">
-                            <button onClick={() => { setShowPasswordModal(false); setPasswordTarget(null); setPasswordForm({ newPassword: '', confirmPassword: '' }); }} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">Batal</button>
-                            <button
-                                onClick={handleChangePassword}
-                                disabled={actionLoading === 'password' || !passwordForm.newPassword || passwordForm.newPassword !== passwordForm.confirmPassword || passwordTarget.id !== currentUser?.id}
-                                className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors"
-                            >
-                                {actionLoading === 'password' ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
-                                Ubah Password
-                            </button>
+                            <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex gap-3 justify-end">
+                                <button onClick={() => { setShowEditAccountModal(false); setEditingAccount(null); }} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">Batal</button>
+                                <button onClick={handleEditAccount} disabled={actionLoading === 'editAccount'} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
+                                    {actionLoading === 'editAccount' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                    Simpan Perubahan
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+
+            {/* Change Password Modal */}
+            {
+                showPasswordModal && passwordTarget && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl">
+                            <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <Lock className="w-5 h-5" /> Ubah Password
+                                </h3>
+                                <p className="text-sm text-gray-500 mt-1">{passwordTarget.full_name || passwordTarget.email}</p>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {passwordTarget.id !== currentUser?.id && (
+                                    <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-xl p-3">
+                                        <p className="text-xs text-yellow-700 dark:text-yellow-400">⚠️ Untuk mengubah password user lain, gunakan Supabase Dashboard → Authentication → Users</p>
+                                    </div>
+                                )}
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Password Baru</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showNewPassword ? 'text' : 'password'}
+                                            className="input w-full pr-10"
+                                            placeholder="Min. 6 karakter"
+                                            value={passwordForm.newPassword}
+                                            onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
+                                            disabled={passwordTarget.id !== currentUser?.id}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Konfirmasi Password Baru</label>
+                                    <input
+                                        type="password"
+                                        className="input w-full"
+                                        placeholder="Ketik ulang password baru"
+                                        value={passwordForm.confirmPassword}
+                                        onChange={e => setPasswordForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                                        disabled={passwordTarget.id !== currentUser?.id}
+                                    />
+                                    {passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword && (
+                                        <p className="text-xs text-red-500 mt-1">Password tidak cocok</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex gap-3 justify-end">
+                                <button onClick={() => { setShowPasswordModal(false); setPasswordTarget(null); setPasswordForm({ newPassword: '', confirmPassword: '' }); }} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">Batal</button>
+                                <button
+                                    onClick={handleChangePassword}
+                                    disabled={actionLoading === 'password' || !passwordForm.newPassword || passwordForm.newPassword !== passwordForm.confirmPassword || passwordTarget.id !== currentUser?.id}
+                                    className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors"
+                                >
+                                    {actionLoading === 'password' ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
+                                    Ubah Password
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
     );
 }
 

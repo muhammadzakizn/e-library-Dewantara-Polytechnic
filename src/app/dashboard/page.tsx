@@ -23,18 +23,63 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 export default function DashboardPage() {
     const [user, setUser] = useState<SupabaseUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [showRetry, setShowRetry] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     useEffect(() => {
+        let mounted = true;
+        let isRedirecting = false;
+
+        // Show retry button after 8 seconds as safety net
+        const retryTimer = setTimeout(() => {
+            if (mounted && !isRedirecting) setShowRetry(true);
+        }, 8000);
+
         const supabase = createClient();
 
         const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-            setIsLoading(false);
+            try {
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                if (authError) throw authError;
+
+                if (user) {
+                    const { data: profile, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', user.id)
+                        .single();
+
+                    if (profileError && profileError.code !== 'PGRST116') {
+                        console.error('Error fetching profile:', profileError);
+                    }
+
+                    if (profile?.role === 'admin' || profile?.role === 'dosen') {
+                        // Keep loading state while redirecting — don't render empty dashboard
+                        isRedirecting = true;
+                        window.location.href = '/admin/dashboard';
+                        return;
+                    }
+                }
+
+                if (mounted) {
+                    setUser(user);
+                    setIsLoading(false);
+                }
+            } catch (error) {
+                console.error('Error in getUser:', error);
+                // Only stop loading on error if not redirecting
+                if (mounted && !isRedirecting) {
+                    setIsLoading(false);
+                }
+            }
         };
 
         getUser();
+
+        return () => {
+            mounted = false;
+            clearTimeout(retryTimer);
+        };
     }, []);
 
     const handleLogout = async () => {
@@ -52,9 +97,17 @@ export default function DashboardPage() {
     if (isLoading) {
         return (
             <div className="min-h-screen pt-24 pb-12 bg-[var(--background-secondary)] flex items-center justify-center">
-                <div className="text-center">
-                    <Loader2 className="w-10 h-10 text-primary-500 animate-spin mx-auto mb-4" />
-                    <p className="text-gray-500">Memuat dashboard...</p>
+                <div className="text-center flex flex-col items-center">
+                    <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-4" />
+                    <p className="text-gray-500 mb-4">Memuat dashboard...</p>
+                    {showRetry && (
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors animate-in fade-in"
+                        >
+                            Muat Ulang Halaman
+                        </button>
+                    )}
                 </div>
             </div>
         );
