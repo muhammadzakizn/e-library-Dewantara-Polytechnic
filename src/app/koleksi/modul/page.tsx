@@ -64,7 +64,7 @@ export default function ModulPage() {
                         <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
                             Modul dan materi pembelajaran untuk setiap mata kuliah
                         </p>
-                        <SearchBar placeholder="Cari modul atau bahan ajar..." showFilters />
+                        <SearchBar showFilters />
                     </div>
                 </div>
             </section>

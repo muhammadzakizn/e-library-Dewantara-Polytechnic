@@ -65,8 +65,7 @@ export default function BukuDigitalPage() {
                         <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
                             Jelajahi koleksi buku digital dari berbagai bidang ilmu
                         </p>
-                        {/* Force bypass type check */}
-                        <SearchBar {...({ placeholder: "Cari buku digital...", showFilters: true } as any)} />
+                        <SearchBar showFilters />
                     </div>
                 </div>
             </section>

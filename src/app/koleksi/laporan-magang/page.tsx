@@ -65,7 +65,7 @@ export default function LaporanMagangPage() {
                         <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
                             Koleksi laporan magang mahasiswa Politeknik Dewantara
                         </p>
-                        <SearchBar placeholder="Cari laporan magang..." showFilters />
+                        <SearchBar showFilters />
                     </div>
                 </div>
             </section>

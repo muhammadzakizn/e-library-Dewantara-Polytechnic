@@ -64,7 +64,7 @@ export default function JurnalPage() {
                         <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
                             Akses jurnal ilmiah nasional dan internasional
                         </p>
-                        <SearchBar placeholder="Cari jurnal..." showFilters />
+                        <SearchBar showFilters />
                     </div>
                 </div>
             </section>
