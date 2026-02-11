@@ -21,6 +21,7 @@ export default function UploadCollectionModal({ isOpen, onClose, onSuccess, type
         kategori: '', // or jurusan for modul
         deskripsi: '',
         isbn: '', // or issn
+        semester: '', // for modul
     });
     const [coverFile, setCoverFile] = useState<File | null>(null);
     const [docFile, setDocFile] = useState<File | null>(null);
@@ -83,6 +84,7 @@ export default function UploadCollectionModal({ isOpen, onClose, onSuccess, type
                     dosen_name: formData.penulis, // mapping
                     dosen_id: user?.id, // Default to uploader if admin/dosen
                     jurusan_id: formData.kategori, // mapping
+                    semester: formData.semester,
                     cover_url: coverUrl,
                     file_url: docUrl,
                     status: 'published'
@@ -216,19 +218,54 @@ export default function UploadCollectionModal({ isOpen, onClose, onSuccess, type
                                     />
                                 </div>
                             </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     {type === 'modul' ? 'Jurusan/Prodi' : 'Kategori/Genre'}
                                 </label>
-                                <input
-                                    required
-                                    type="text"
-                                    value={formData.kategori}
-                                    onChange={e => setFormData({ ...formData, kategori: e.target.value })}
-                                    className="input w-full"
-                                    placeholder={type === 'modul' ? 'Contoh: Teknik Informatika' : 'Contoh: Teknologi, Sains'}
-                                />
+                                {type === 'modul' ? (
+                                    <select
+                                        required
+                                        value={formData.kategori}
+                                        onChange={e => setFormData({ ...formData, kategori: e.target.value })}
+                                        className="input w-full"
+                                    >
+                                        <option value="">Pilih Jurusan</option>
+                                        <option value="Teknologi Rekayasa Multimedia">Teknologi Rekayasa Multimedia</option>
+                                        <option value="Teknologi Rekayasa Pangan">Teknologi Rekayasa Pangan</option>
+                                        <option value="Teknologi Rekayasa Metalurgi">Teknologi Rekayasa Metalurgi</option>
+                                        <option value="Arsitektur">Arsitektur</option>
+                                        <option value="Teknik Sipil">Teknik Sipil</option>
+                                        <option value="Teknik Elektronika">Teknik Elektronika</option>
+                                        <option value="Teknik Mesin dan Otomotif">Teknik Mesin dan Otomotif</option>
+                                    </select>
+                                ) : (
+                                    <input
+                                        required
+                                        type="text"
+                                        value={formData.kategori}
+                                        onChange={e => setFormData({ ...formData, kategori: e.target.value })}
+                                        className="input w-full"
+                                        placeholder="Contoh: Teknologi, Sains"
+                                    />
+                                )}
                             </div>
+                            {type === 'modul' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Semester</label>
+                                    <select
+                                        required
+                                        value={formData.semester}
+                                        onChange={e => setFormData({ ...formData, semester: e.target.value })}
+                                        className="input w-full"
+                                    >
+                                        <option value="">Pilih Semester</option>
+                                        {[1, 2, 3, 4, 5, 6, 7, 8].map(sem => (
+                                            <option key={sem} value={`Semester ${sem}`}>Semester {sem}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                         </div>
                     </div>
 

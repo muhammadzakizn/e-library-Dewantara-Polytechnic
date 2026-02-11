@@ -43,7 +43,34 @@ export async function getCollectionItems(
         .eq(statusField, statusValue)
         .range(start, end);
 
-    // Apply Search
+    // Apply Filter
+    if (options.filter && options.filter !== 'Semua') {
+        if (category === 'modul') {
+            if (options.filter.startsWith('Semester')) {
+                // Filter by semester
+                // Note: Ensure column 'semester' exists via migration
+                query = query.eq('semester', options.filter);
+            } else {
+                // Filter by jurusan
+                query = query.eq('jurusan_id', options.filter);
+            }
+        } else if (category === 'laporan_magang') {
+            if (/^\d{4}$/.test(options.filter)) {
+                // Filter by year (using start_date)
+                query = query.like('start_date', `${options.filter}%`);
+            } else {
+                // Filter by prodi
+                query = query.eq('user_prodi', options.filter);
+            }
+        } else {
+            // Buku / Jurnal
+            if (/^\d{4}$/.test(options.filter)) {
+                query = query.eq('tahun_terbit', parseInt(options.filter));
+            } else {
+                query = query.eq('kategori', options.filter);
+            }
+        }
+    }
     if (options.search) {
         const searchCol = category === 'laporan_magang' ? 'title' : 'judul';
         query = query.ilike(searchCol, `%${options.search}%`);

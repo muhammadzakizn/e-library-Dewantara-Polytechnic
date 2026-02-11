@@ -10,10 +10,23 @@ import { fetchBooksAction } from '@/app/actions';
 import { Book } from '@/lib/api/books';
 
 const categories = [
-    { label: 'Semester 1-2', value: 'Semester 1-2' },
-    { label: 'Semester 3-4', value: 'Semester 3-4' },
-    { label: 'Semester 5-6', value: 'Semester 5-6' },
-    { label: 'Praktikum', value: 'Praktikum' },
+    // Jurusan
+    { label: 'Teknologi Rekayasa Multimedia', value: 'Teknologi Rekayasa Multimedia' },
+    { label: 'Teknologi Rekayasa Pangan', value: 'Teknologi Rekayasa Pangan' },
+    { label: 'Teknologi Rekayasa Metalurgi', value: 'Teknologi Rekayasa Metalurgi' },
+    { label: 'Arsitektur', value: 'Arsitektur' },
+    { label: 'Teknik Sipil', value: 'Teknik Sipil' },
+    { label: 'Teknik Elektronika', value: 'Teknik Elektronika' },
+    { label: 'Teknik Mesin dan Otomotif', value: 'Teknik Mesin dan Otomotif' },
+    // Semesters
+    { label: 'Semester 1', value: 'Semester 1' },
+    { label: 'Semester 2', value: 'Semester 2' },
+    { label: 'Semester 3', value: 'Semester 3' },
+    { label: 'Semester 4', value: 'Semester 4' },
+    { label: 'Semester 5', value: 'Semester 5' },
+    { label: 'Semester 6', value: 'Semester 6' },
+    { label: 'Semester 7', value: 'Semester 7' },
+    { label: 'Semester 8', value: 'Semester 8' },
 ];
 
 const ITEMS_PER_PAGE = 12;
