@@ -1,22 +1,39 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Briefcase, Upload, Calendar, Building, Loader2, BookOpen } from 'lucide-react';
 import SearchBar from '@/components/ui/SearchBar';
+import FloatingFilter from '@/components/ui/FloatingFilter';
 import { fetchBooksAction } from '@/app/actions';
 import { Book } from '@/lib/api/books';
 
-const filters = ['Semua', '2024', '2023', '2022', 'Teknologi Rekayasa Multimedia', 'Teknologi Rekayasa Pangan', 'Teknologi Rekayasa Metalurgi', 'Arsitektur', 'Teknik Sipil', 'Teknik Elektronika', 'Teknik Mesin dan Otomotif'];
+const categories = [
+    { label: '2024', value: '2024' },
+    { label: '2023', value: '2023' },
+    { label: '2022', value: '2022' },
+    { label: 'Teknologi Rekayasa Multimedia', value: 'Teknologi Rekayasa Multimedia' },
+    { label: 'Teknologi Rekayasa Pangan', value: 'Teknologi Rekayasa Pangan' },
+    { label: 'Teknologi Rekayasa Metalurgi', value: 'Teknologi Rekayasa Metalurgi' },
+    { label: 'Arsitektur', value: 'Arsitektur' },
+    { label: 'Teknik Sipil', value: 'Teknik Sipil' },
+    { label: 'Teknik Elektronika', value: 'Teknik Elektronika' },
+    { label: 'Teknik Mesin dan Otomotif', value: 'Teknik Mesin dan Otomotif' },
+];
+
 const ITEMS_PER_PAGE = 10;
 
-export default function LaporanMagangPage() {
+function LaporanMagangContent() {
+    const searchParams = useSearchParams();
     const [reports, setReports] = useState<Book[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeFilter, setActiveFilter] = useState('Semua');
-    const [sortBy, setSortBy] = useState<'relevance' | 'newest'>('relevance');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+
+    const filter = searchParams.get('filter') || 'Semua';
+    const sort = (searchParams.get('sort') as 'relevance' | 'newest') || 'relevance';
+    const year = searchParams.get('year') || '';
 
     useEffect(() => {
         async function fetchReports() {
@@ -25,8 +42,8 @@ export default function LaporanMagangPage() {
                 const result = await fetchBooksAction('laporan_magang', {
                     page: currentPage,
                     limit: ITEMS_PER_PAGE,
-                    filter: activeFilter,
-                    sort: sortBy,
+                    filter: filter,
+                    sort: sort as 'relevance' | 'newest',
                 });
                 setReports(result.books);
                 setTotalItems(result.totalItems);
@@ -38,19 +55,11 @@ export default function LaporanMagangPage() {
             }
         }
         fetchReports();
-    }, [activeFilter, sortBy, currentPage]);
+    }, [filter, sort, currentPage, year]);
 
     const totalPages = Math.min(Math.ceil(totalItems / ITEMS_PER_PAGE), 10);
 
-    const handleFilterChange = (filter: string) => {
-        setActiveFilter(filter);
-        setCurrentPage(1);
-    };
-
-    const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSortBy(e.target.value as 'relevance' | 'newest');
-        setCurrentPage(1);
-    };
+    // Handlers removed
 
     return (
         <div className="min-h-screen pt-24">
@@ -96,24 +105,8 @@ export default function LaporanMagangPage() {
             </section>
 
             {/* Content */}
-            <section className="py-12">
+            <section className="py-12 relative min-h-[500px]">
                 <div className="container-custom">
-                    {/* Filters */}
-                    <div className="flex flex-wrap gap-3 mb-8">
-                        {filters.map((filter) => (
-                            <button
-                                key={filter}
-                                onClick={() => handleFilterChange(filter)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeFilter === filter
-                                    ? 'bg-orange-500 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900'
-                                    }`}
-                            >
-                                {filter}
-                            </button>
-                        ))}
-                    </div>
-
                     {/* Results */}
                     <div className="flex items-center justify-between mb-6">
                         <p className="text-gray-500 dark:text-gray-400">
@@ -123,14 +116,6 @@ export default function LaporanMagangPage() {
                                 <>Menampilkan <span className="font-semibold text-primary-900 dark:text-white">{totalItems.toLocaleString()}</span> laporan magang</>
                             )}
                         </p>
-                        <select
-                            className="input py-2 px-4 w-auto text-sm"
-                            value={sortBy}
-                            onChange={handleSortChange}
-                        >
-                            <option value="relevance">Terpopuler</option>
-                            <option value="newest">Terbaru</option>
-                        </select>
                     </div>
 
                     {/* Reports List */}
@@ -234,6 +219,18 @@ export default function LaporanMagangPage() {
                     )}
                 </div>
             </section>
+
+            <FloatingFilter
+                categories={categories}
+            />
         </div>
+    );
+}
+
+export default function LaporanMagangPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen pt-24 flex justify-center"><Loader2 className="animate-spin" /></div>}>
+            <LaporanMagangContent />
+        </Suspense>
     );
 }
