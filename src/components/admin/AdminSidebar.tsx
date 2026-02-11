@@ -15,18 +15,22 @@ interface AdminSidebarProps {
     setActiveSection: (section: AdminSection) => void;
     onLogout: () => void;
     currentProfile: any;
+    isSidebarOpen: boolean;
+    setIsSidebarOpen: (isOpen: boolean) => void;
 }
 
 export default function AdminSidebar({
     activeSection,
     setActiveSection,
     onLogout,
-    currentProfile
+    currentProfile,
+    isSidebarOpen,
+    setIsSidebarOpen
 }: AdminSidebarProps) {
     const [isHovered, setIsHovered] = useState(false);
-    const [isPinned, setIsPinned] = useState(true);
 
-    const isExpanded = isHovered || isPinned;
+    // Combined state: Sidebar is expanded if pinned (isOpen) OR hovered
+    const isExpanded = isSidebarOpen || isHovered;
 
     const sidebarItems = [
         { key: 'beranda', label: 'Beranda', icon: LayoutDashboard },
@@ -63,17 +67,23 @@ export default function AdminSidebar({
                 </div>
 
                 {!isExpanded && (
-                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-                        <Shield className="w-6 h-6 text-white" />
+                    <div className="w-12 h-12 flex items-center justify-center transition-all duration-300">
+                        <Image
+                            src="/logo-poltek.png"
+                            alt="Logo"
+                            width={48}
+                            height={48}
+                            className="object-contain drop-shadow-md"
+                        />
                     </div>
                 )}
 
                 {isExpanded && (
                     <button
-                        onClick={() => setIsPinned(!isPinned)}
-                        className={`p-1.5 rounded-lg transition-colors ${isPinned ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                        className={`p-1.5 rounded-lg transition-colors ${isSidebarOpen ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                     >
-                        {isPinned ? <Pin className="w-4 h-4" /> : <PinOff className="w-4 h-4" />}
+                        {isSidebarOpen ? <Pin className="w-4 h-4" /> : <PinOff className="w-4 h-4" />}
                     </button>
                 )}
             </div>

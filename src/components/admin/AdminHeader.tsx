@@ -2,15 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import {
-    Bell, Search, Moon, Sun, Cloud, CloudRain, CloudSun, CloudLightning,
-    Wind, Droplets
+    Bell, Sun, Cloud, CloudRain, CloudSun,
 } from 'lucide-react';
 
 interface WeatherData {
     temp: number;
-    condition: string; // 'Clear', 'Cloudy', 'Rain', etc.
+    condition: string;
     location: string;
 }
+
+const greetings = {
+    pagi: ["Semangat Pagi ☀️", "Awali dengan senyuman 😊", "Siap produktif hari ini? 🚀", "Jangan lupa sarapan ☕"],
+    siang: ["Tetap semangat 💪", "Jangan lupa istirahat 🍱", "Lanjutkan kerja bagus 👍", "Tetap fokus 🎯"],
+    sore: ["Hampir selesai 🌅", "Review hari ini 📝", "Persiapan pulang 🏡", "Tetap energik ⚡"],
+    malam: ["Selamat beristirahat 🌙", "Jangan lupa save pekerjaan 💾", "Lembur? Semangat! 🦉", "Mimpi indah 💤"]
+};
 
 export default function AdminHeader({
     title,
@@ -22,22 +28,41 @@ export default function AdminHeader({
     settings?: any;
 }) {
     const [greeting, setGreeting] = useState('');
+    const [subGreeting, setSubGreeting] = useState('');
     const [weather, setWeather] = useState<WeatherData | null>(null);
-    const [currentTime, setCurrentTime] = useState(new Date());
+    const [currentTime, setCurrentTime] = useState<Date | null>(null);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        // Dynamic greeting
+        setMounted(true);
+        const updateTime = () => {
+            const now = new Date();
+            setCurrentTime(now);
+
+            const hour = now.getHours();
+            let mainGreet = 'Selamat Malam';
+
+            if (hour >= 5 && hour < 11) { mainGreet = 'Selamat Pagi'; }
+            else if (hour >= 11 && hour < 15) { mainGreet = 'Selamat Siang'; }
+            else if (hour >= 15 && hour < 18) { mainGreet = 'Selamat Sore'; }
+
+            setGreeting(mainGreet);
+        };
+
+        updateTime();
+        const timer = setInterval(updateTime, 1000);
+
+        // Set random sub-greeting
         const hour = new Date().getHours();
-        if (hour < 11) setGreeting('Selamat Pagi');
-        else if (hour < 15) setGreeting('Selamat Siang');
-        else if (hour < 18) setGreeting('Selamat Sore');
-        else setGreeting('Selamat Malam');
+        let timeKey: keyof typeof greetings = 'malam';
+        if (hour >= 5 && hour < 11) timeKey = 'pagi';
+        else if (hour >= 11 && hour < 15) timeKey = 'siang';
+        else if (hour >= 15 && hour < 18) timeKey = 'sore';
 
-        // Clock timer
-        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+        const randomMsg = greetings[timeKey][Math.floor(Math.random() * greetings[timeKey].length)];
+        setSubGreeting(randomMsg);
 
-        // Simulated Weather (In real app, fetch from OpenMeteo)
-        // Default to Jakarta/Campus location
+        // Simulated Weather
         setWeather({
             temp: 28,
             condition: 'Cloudy',
@@ -49,51 +74,93 @@ export default function AdminHeader({
 
     const getWeatherIcon = (condition: string) => {
         switch (condition.toLowerCase()) {
-            case 'rain': return <CloudRain className="w-5 h-5 text-blue-400" />;
-            case 'clear': return <Sun className="w-5 h-5 text-orange-400" />;
-            case 'cloudy': return <Cloud className="w-5 h-5 text-gray-400" />;
-            default: return <CloudSun className="w-5 h-5 text-yellow-400" />;
+            case 'rain': return <CloudRain className="w-8 h-8 text-white/90 drop-shadow-md" />;
+            case 'clear': return <Sun className="w-8 h-8 text-yellow-300 drop-shadow-md" />;
+            case 'cloudy': return <Cloud className="w-8 h-8 text-gray-200 drop-shadow-md" />;
+            default: return <CloudSun className="w-8 h-8 text-yellow-100 drop-shadow-md" />;
         }
     };
 
-    return (
-        <header className="h-24 px-8 flex items-center justify-between sticky top-0 z-40">
-            {/* Glass Background */}
-            <div className="absolute inset-x-4 top-4 bottom-0 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border border-white/20 dark:border-gray-800 rounded-3xl shadow-sm -z-10" />
+    if (!mounted || !currentTime) return null;
 
-            <div className="flex items-center gap-4 ml-6">
-                <div>
-                    <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
-                        {title}
-                    </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                        {greeting}, <span className="font-semibold text-blue-600 dark:text-blue-400">{user?.full_name?.split(' ')[0] || 'Admin'}</span>
-                        <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
-                        <span>{currentTime.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                    </p>
+    // Split time parts for formatting
+    const timeString = currentTime.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const [time, ampm] = timeString.split(' ');
+    const [hh, mm, ss] = time.split(':');
+
+    return (
+        <header className="px-6 lg:px-8 py-6 mb-2 flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+            {/* Left: User Info */}
+            <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm font-medium animate-fade-in">
+                    <span>{greeting}, {subGreeting}</span>
+                </div>
+
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight">
+                    {user?.full_name || 'Administrator'}
+                </h1>
+
+                <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <span className="capitalize font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2.5 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800">
+                        {user?.role || 'Admin'}
+                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
+                    <span className="font-medium text-gray-600 dark:text-gray-300">{user?.program_studi || 'Teknologi Rekayasa Multimedia'}</span>
                 </div>
             </div>
 
-            <div className="flex items-center gap-4 mr-6">
-                {/* Weather Widget */}
-                {weather && (
-                    <div className="flex items-center gap-3 px-4 py-2 bg-white/50 dark:bg-gray-800/50 rounded-2xl border border-white/20 dark:border-gray-700 hover:bg-white/80 transition-colors cursor-pointer group">
-                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl group-hover:scale-110 transition-transform">
-                            {getWeatherIcon(weather.condition)}
-                        </div>
-                        <div className="text-right hidden sm:block">
-                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{weather.location}</p>
-                            <p className="text-lg font-bold text-gray-900 dark:text-white leading-none">
-                                {weather.temp}°C
+            {/* Right: Time & Weather Widget */}
+            <div className="flex items-center gap-6">
+                {/* Clock & Weather Card */}
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl shadow-blue-600/20 p-6 min-w-[300px] group transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-600/30">
+
+                    {/* Background Animation (Weather) */}
+                    <div className="absolute -top-10 -right-10 opacity-10 group-hover:opacity-20 transition-all duration-1000 rotate-12 group-hover:rotate-45">
+                        <CloudSun className="w-48 h-48" />
+                    </div>
+                    <div className="absolute inset-0 bg-white/5 backdrop-blur-[0.5px] group-hover:bg-white/10 transition-colors" />
+
+                    <div className="relative z-10 flex justify-between items-center">
+                        <div className="flex flex-col">
+                            <p className="text-[10px] font-bold text-blue-200 mb-0.5 uppercase tracking-widest">
+                                Local Time
+                            </p>
+                            <div className="flex items-baseline mb-2">
+                                <span className="text-4xl font-bold font-mono tracking-tighter tabular-nums text-white drop-shadow-sm">
+                                    {hh}:{mm}
+                                </span>
+                                <span className="text-xl font-medium font-mono text-blue-200 ml-1 w-6">
+                                    {ss}
+                                </span>
+                                <span className="text-xs font-bold bg-white/20 px-1.5 py-0.5 rounded text-white ml-2 backdrop-blur-sm">
+                                    {ampm}
+                                </span>
+                            </div>
+                            <p className="text-xs font-medium text-blue-100 opacity-90">
+                                {currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                             </p>
                         </div>
+
+                        <div className="flex flex-col items-end pl-6 border-l border-white/10">
+                            <div className="animate-float">
+                                {weather && getWeatherIcon(weather.condition)}
+                            </div>
+                            <div className="flex items-start mt-1">
+                                <span className="text-2xl font-bold leading-none">{weather?.temp}°</span>
+                                <span className="text-xs mt-1 opacity-70">C</span>
+                            </div>
+                            <span className="text-[10px] uppercase font-bold text-blue-200 mt-1 tracking-wider text-right max-w-[80px] leading-tight">
+                                {weather?.location.split(' ')[0]}
+                            </span>
+                        </div>
                     </div>
-                )}
+                </div>
 
                 {/* Notifications */}
-                <button className="w-10 h-10 rounded-xl bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-800 transition-all relative">
-                    <Bell className="w-5 h-5" />
-                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900" />
+                <button className="h-14 w-14 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-blue-100 dark:hover:border-blue-900 shadow-sm hover:shadow-lg flex items-center justify-center text-gray-400 group-hover:text-blue-500 transition-all relative group">
+                    <Bell className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="absolute top-4 right-4 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 animate-ping" />
+                    <span className="absolute top-4 right-4 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-800" />
                 </button>
             </div>
         </header>

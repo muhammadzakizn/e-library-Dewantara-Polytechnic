@@ -20,6 +20,8 @@ export default function AdminDashboard() {
     const [currentProfile, setCurrentProfile] = useState<any>(null);
     const [stats, setStats] = useState({ users: 0, admins: 0, reports: 0, pendingReports: 0 });
 
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
     const supabase = createClient();
 
     useEffect(() => {
@@ -109,9 +111,11 @@ export default function AdminDashboard() {
                 setActiveSection={setActiveSection}
                 onLogout={handleLogout}
                 currentProfile={currentProfile}
+                isSidebarOpen={isSidebarOpen}
+                setIsSidebarOpen={setIsSidebarOpen}
             />
 
-            <main className="ml-20 lg:ml-24 transition-all duration-300 flex-1 min-h-screen relative z-10">
+            <main className={`transition-all duration-300 flex-1 min-h-screen relative z-10 ${isSidebarOpen ? 'ml-64' : 'ml-20'}`}>
                 <AdminHeader
                     title={
                         activeSection === 'beranda' ? 'Dashboard Overview' :
