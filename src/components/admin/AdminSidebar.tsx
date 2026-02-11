@@ -27,8 +27,10 @@ export default function AdminSidebar({
     isSidebarOpen,
     setIsSidebarOpen
 }: AdminSidebarProps) {
-    // Simplified state: Sidebar is expanded only if pinned (isOpen)
-    const isExpanded = isSidebarOpen;
+    const [isHovered, setIsHovered] = useState(false);
+
+    // Sidebar expands if pinned (isOpen) OR hovered
+    const isExpanded = isSidebarOpen || isHovered;
 
     const sidebarItems = [
         { key: 'beranda', label: 'Beranda', icon: LayoutDashboard },
@@ -43,6 +45,8 @@ export default function AdminSidebar({
                 ${isExpanded ? 'w-64' : 'w-20'}
                 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-white/20 dark:border-gray-800
                 shadow-2xl rounded-3xl overflow-hidden`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
         >
             {/* Header / Logo */}
             <div className={`h-20 flex items-center px-6 border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300 ${isExpanded ? 'justify-between' : 'justify-center'}`}>
