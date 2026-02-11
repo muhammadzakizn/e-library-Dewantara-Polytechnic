@@ -50,6 +50,7 @@ ALTER TABLE public.laporan_magang ADD COLUMN IF NOT EXISTS rejection_reason TEXT
 ALTER TABLE public.laporan_magang ADD COLUMN IF NOT EXISTS jurusan_id UUID REFERENCES public.jurusan(id);
 
 -- Allow admins to view ALL laporan (update RLS)
+DROP POLICY IF EXISTS "Admins can view all laporan" ON public.laporan_magang;
 CREATE POLICY "Admins can view all laporan" ON public.laporan_magang
     FOR SELECT USING (
         EXISTS (
@@ -60,6 +61,7 @@ CREATE POLICY "Admins can view all laporan" ON public.laporan_magang
     );
 
 -- Allow admins/dosen to update laporan status
+DROP POLICY IF EXISTS "Admins can update laporan status" ON public.laporan_magang;
 CREATE POLICY "Admins can update laporan status" ON public.laporan_magang
     FOR UPDATE USING (
         EXISTS (
@@ -70,6 +72,7 @@ CREATE POLICY "Admins can update laporan status" ON public.laporan_magang
     );
 
 -- Allow approved laporan to be viewed by everyone (published)
+DROP POLICY IF EXISTS "Public can view approved laporan" ON public.laporan_magang;
 CREATE POLICY "Public can view approved laporan" ON public.laporan_magang
     FOR SELECT USING (status = 'approved');
 
@@ -94,10 +97,12 @@ ON CONFLICT (key) DO NOTHING;
 ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
 
 -- Everyone can read settings
+DROP POLICY IF EXISTS "Anyone can read settings" ON public.app_settings;
 CREATE POLICY "Anyone can read settings" ON public.app_settings
     FOR SELECT USING (true);
 
 -- Only admins can update settings
+DROP POLICY IF EXISTS "Admins can update settings" ON public.app_settings;
 CREATE POLICY "Admins can update settings" ON public.app_settings
     FOR UPDATE USING (
         EXISTS (
@@ -108,6 +113,7 @@ CREATE POLICY "Admins can update settings" ON public.app_settings
     );
 
 -- Only admins can insert settings
+DROP POLICY IF EXISTS "Admins can insert settings" ON public.app_settings;
 CREATE POLICY "Admins can insert settings" ON public.app_settings
     FOR INSERT WITH CHECK (
         EXISTS (
@@ -121,10 +127,12 @@ CREATE POLICY "Admins can insert settings" ON public.app_settings
 ALTER TABLE public.jurusan ENABLE ROW LEVEL SECURITY;
 
 -- Everyone can read jurusan
+DROP POLICY IF EXISTS "Anyone can read jurusan" ON public.jurusan;
 CREATE POLICY "Anyone can read jurusan" ON public.jurusan
     FOR SELECT USING (true);
 
 -- Only admins can manage jurusan
+DROP POLICY IF EXISTS "Admins can insert jurusan" ON public.jurusan;
 CREATE POLICY "Admins can insert jurusan" ON public.jurusan
     FOR INSERT WITH CHECK (
         EXISTS (
@@ -134,6 +142,7 @@ CREATE POLICY "Admins can insert jurusan" ON public.jurusan
         )
     );
 
+DROP POLICY IF EXISTS "Admins can update jurusan" ON public.jurusan;
 CREATE POLICY "Admins can update jurusan" ON public.jurusan
     FOR UPDATE USING (
         EXISTS (
@@ -143,6 +152,7 @@ CREATE POLICY "Admins can update jurusan" ON public.jurusan
         )
     );
 
+DROP POLICY IF EXISTS "Admins can delete jurusan" ON public.jurusan;
 CREATE POLICY "Admins can delete jurusan" ON public.jurusan
     FOR DELETE USING (
         EXISTS (
@@ -153,6 +163,7 @@ CREATE POLICY "Admins can delete jurusan" ON public.jurusan
     );
 
 -- 6. Allow admins to update any profile (for role assignment)
+DROP POLICY IF EXISTS "Admins can update any profile" ON public.profiles;
 CREATE POLICY "Admins can update any profile" ON public.profiles
     FOR UPDATE USING (
         EXISTS (
