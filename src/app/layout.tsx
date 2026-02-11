@@ -56,7 +56,9 @@ export const metadata: Metadata = {
         follow: true,
     },
     icons: {
-        icon: '/favicon.ico',
+        icon: '/logo-poltek.png',
+        shortcut: '/logo-poltek.png',
+        apple: '/logo-poltek.png',
     },
 }
 
