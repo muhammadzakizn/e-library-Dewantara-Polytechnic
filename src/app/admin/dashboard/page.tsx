@@ -11,8 +11,8 @@ import {
     Lock, KeyRound, UserCog
 } from 'lucide-react';
 
-type AdminSection = 'beranda' | 'jurusan' | 'akun' | 'laporan' | 'pengaturan';
-type Profile = { id: string; email: string; full_name: string; role: string; username: string; jurusan_id: string; permissions: any; created_at: string; };
+type AdminSection = 'beranda' | 'jurusan' | 'akun' | 'mahasiswa' | 'laporan' | 'pengaturan';
+type Profile = { id: string; email: string; full_name: string; role: string; username: string; jurusan_id: string; permissions: any; created_at: string; is_banned?: boolean; ban_reason?: string; banned_at?: string; nim?: string; program_studi?: string; avatar_url?: string; };
 type Jurusan = { id: string; nama: string; kode: string; jenjang: string; is_active: boolean; };
 type LaporanMagang = { id: string; title: string; company: string; user_name: string; user_nim: string; user_prodi: string; status: string; created_at: string; approved_by: string; approved_at: string; rejection_reason: string; jurusan_id: string; };
 
@@ -26,6 +26,7 @@ export default function AdminDashboard() {
     // Data states
     const [jurusanList, setJurusanList] = useState<Jurusan[]>([]);
     const [adminList, setAdminList] = useState<Profile[]>([]);
+    const [studentList, setStudentList] = useState<Profile[]>([]);
     const [laporanList, setLaporanList] = useState<LaporanMagang[]>([]);
     const [settings, setSettings] = useState<Record<string, any>>({});
     const [stats, setStats] = useState({ users: 0, admins: 0, reports: 0, pendingReports: 0 });
@@ -41,10 +42,14 @@ export default function AdminDashboard() {
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [showEditAccountModal, setShowEditAccountModal] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [showEditStudentModal, setShowEditStudentModal] = useState(false);
+    const [showBanModal, setShowBanModal] = useState(false);
     const [editingJurusan, setEditingJurusan] = useState<Jurusan | null>(null);
     const [selectedLaporan, setSelectedLaporan] = useState<LaporanMagang | null>(null);
     const [editingAccount, setEditingAccount] = useState<Profile | null>(null);
     const [passwordTarget, setPasswordTarget] = useState<Profile | null>(null);
+    const [editingStudent, setEditingStudent] = useState<Profile | null>(null);
+    const [banTarget, setBanTarget] = useState<Profile | null>(null);
 
     // Form states
     const [jurusanForm, setJurusanForm] = useState({ nama: '', kode: '', jenjang: 'D3' });
@@ -54,6 +59,9 @@ export default function AdminDashboard() {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const [studentEditForm, setStudentEditForm] = useState({ fullName: '', nim: '', programStudi: '' });
+    const [banReasonInput, setBanReasonInput] = useState('');
+    const [studentSearch, setStudentSearch] = useState('');
 
     const supabase = createClient();
 
@@ -111,6 +119,10 @@ export default function AdminDashboard() {
             if (activeSection === 'akun') {
                 const { data } = await supabase.from('profiles').select('*').in('role', ['admin', 'dosen']).order('created_at', { ascending: false });
                 setAdminList(data || []);
+            }
+            if (activeSection === 'mahasiswa') {
+                const { data } = await supabase.from('profiles').select('*').not('role', 'in', '("admin","dosen")').order('created_at', { ascending: false });
+                setStudentList(data || []);
             }
             if (activeSection === 'laporan') {
                 let query = supabase.from('laporan_magang').select('*').order('created_at', { ascending: false });
@@ -315,6 +327,72 @@ export default function AdminDashboard() {
         setActionLoading(null);
     };
 
+    // Maintenance toggle
+    const handleToggleMaintenance = async () => {
+        const current = settings.maintenance_mode?.value;
+        const newValue = current === 'true' || current === true ? 'false' : 'true';
+        setActionLoading('maintenance');
+        await supabase.from('app_settings').update({
+            value: newValue,
+            updated_at: new Date().toISOString(),
+            updated_by: currentUser.id,
+        }).eq('key', 'maintenance_mode');
+        showSuccess(newValue === 'true' ? 'Mode maintenance AKTIF' : 'Mode maintenance NONAKTIF');
+        setActionLoading(null);
+        loadData();
+    };
+
+    // Student management
+    const handleSaveStudent = async () => {
+        if (!editingStudent) return;
+        setActionLoading('student-edit');
+        try {
+            await supabase.from('profiles').update({
+                full_name: studentEditForm.fullName,
+                nim: studentEditForm.nim,
+                program_studi: studentEditForm.programStudi,
+            }).eq('id', editingStudent.id);
+            showSuccess('Profil mahasiswa berhasil diperbarui');
+            setShowEditStudentModal(false);
+            setEditingStudent(null);
+            loadData();
+        } catch (err: any) { showError(err.message); }
+        finally { setActionLoading(null); }
+    };
+
+    const handleResetStudentPassword = async (student: Profile) => {
+        if (!confirm(`Kirim email reset password ke ${student.email}?`)) return;
+        setActionLoading(student.id);
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(student.email, {
+                redirectTo: `${window.location.origin}/login`,
+            });
+            if (error) throw error;
+            showSuccess(`Email reset password terkirim ke ${student.email}`);
+        } catch (err: any) { showError(err.message); }
+        finally { setActionLoading(null); }
+    };
+
+    const handleBanStudent = async () => {
+        if (!banTarget) return;
+        setActionLoading('ban');
+        try {
+            const newBanState = !banTarget.is_banned;
+            await supabase.from('profiles').update({
+                is_banned: newBanState,
+                ban_reason: newBanState ? banReasonInput : null,
+                banned_at: newBanState ? new Date().toISOString() : null,
+                banned_by: newBanState ? currentUser.id : null,
+            }).eq('id', banTarget.id);
+            showSuccess(newBanState ? 'Akun mahasiswa dibatasi' : 'Akun mahasiswa dipulihkan');
+            setShowBanModal(false);
+            setBanTarget(null);
+            setBanReasonInput('');
+            loadData();
+        } catch (err: any) { showError(err.message); }
+        finally { setActionLoading(null); }
+    };
+
     const handleLogout = async () => {
         await supabase.auth.signOut();
         router.push('/login');
@@ -337,8 +415,10 @@ export default function AdminDashboard() {
     const sidebarItems: { key: AdminSection; label: string; icon: any; adminOnly?: boolean }[] = [
         { key: 'beranda', label: 'Beranda', icon: LayoutDashboard },
         { key: 'jurusan', label: 'Kelola Jurusan', icon: GraduationCap, adminOnly: true },
-        { key: 'akun', label: 'Kelola Akun', icon: Users, adminOnly: true },
+        { key: 'akun', label: 'Kelola Admin/Dosen', icon: UserCog, adminOnly: true },
+        { key: 'mahasiswa', label: 'Kelola Mahasiswa', icon: GraduationCap, adminOnly: true },
         { key: 'laporan', label: 'Laporan Magang', icon: ClipboardCheck },
+        { key: 'pengaturan', label: 'Pengaturan Sistem', icon: Settings, adminOnly: true },
     ];
 
     const filteredSidebarItems = sidebarItems.filter(item => !item.adminOnly || isAdmin);
@@ -640,6 +720,128 @@ export default function AdminDashboard() {
                         </div>
                     )}
 
+                    {/* ==================== KELOLA MAHASISWA ==================== */}
+                    {activeSection === 'mahasiswa' && isAdmin && (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Kelola Mahasiswa</h2>
+                                    <p className="text-gray-500 dark:text-gray-400 mt-1">Kelola akun dan profil mahasiswa</p>
+                                </div>
+                            </div>
+
+                            {/* Search */}
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Cari berdasarkan nama, email, NIM..."
+                                    value={studentSearch}
+                                    onChange={e => setStudentSearch(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                />
+                            </div>
+
+                            {/* Student Table */}
+                            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                                                <th className="text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Mahasiswa</th>
+                                                <th className="text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400">NIM</th>
+                                                <th className="text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Program Studi</th>
+                                                <th className="text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Status</th>
+                                                <th className="text-right px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {studentList
+                                                .filter(s => {
+                                                    if (!studentSearch) return true;
+                                                    const q = studentSearch.toLowerCase();
+                                                    return (s.full_name || '').toLowerCase().includes(q)
+                                                        || (s.email || '').toLowerCase().includes(q)
+                                                        || (s.nim || '').toLowerCase().includes(q);
+                                                })
+                                                .map(student => (
+                                                    <tr key={student.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-sm font-medium text-blue-600 dark:text-blue-400">
+                                                                    {(student.full_name || student.email || '?')[0].toUpperCase()}
+                                                                </div>
+                                                                <div>
+                                                                    <p className="font-medium text-gray-900 dark:text-white">{student.full_name || '-'}</p>
+                                                                    <p className="text-xs text-gray-500">{student.email}</p>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{student.nim || '-'}</td>
+                                                        <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{student.program_studi || '-'}</td>
+                                                        <td className="px-4 py-3">
+                                                            {student.is_banned ? (
+                                                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">Dibatasi</span>
+                                                            ) : (
+                                                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Aktif</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setEditingStudent(student);
+                                                                        setStudentEditForm({
+                                                                            fullName: student.full_name || '',
+                                                                            nim: student.nim || '',
+                                                                            programStudi: student.program_studi || '',
+                                                                        });
+                                                                        setShowEditStudentModal(true);
+                                                                    }}
+                                                                    className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/10 rounded-lg transition-colors text-gray-500 hover:text-blue-600"
+                                                                    title="Edit Profil"
+                                                                >
+                                                                    <Pencil className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleResetStudentPassword(student)}
+                                                                    disabled={actionLoading === student.id}
+                                                                    className="p-1.5 hover:bg-amber-50 dark:hover:bg-amber-900/10 rounded-lg transition-colors text-gray-500 hover:text-amber-600"
+                                                                    title="Reset Password"
+                                                                >
+                                                                    {actionLoading === student.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setBanTarget(student);
+                                                                        setBanReasonInput(student.ban_reason || '');
+                                                                        setShowBanModal(true);
+                                                                    }}
+                                                                    className={`p-1.5 rounded-lg transition-colors ${student.is_banned
+                                                                        ? 'hover:bg-green-50 dark:hover:bg-green-900/10 text-green-600 hover:text-green-700'
+                                                                        : 'hover:bg-red-50 dark:hover:bg-red-900/10 text-gray-500 hover:text-red-600'
+                                                                        }`}
+                                                                    title={student.is_banned ? 'Pulihkan Akses' : 'Batasi Akses'}
+                                                                >
+                                                                    {student.is_banned ? <Check className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {studentList.length === 0 && (
+                                    <div className="text-center py-12 text-gray-500">
+                                        <GraduationCap className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                                        <p className="text-sm">Belum ada akun mahasiswa terdaftar.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* ==================== LAPORAN MAGANG ==================== */}
                     {activeSection === 'laporan' && (
                         <div className="space-y-6">
@@ -730,25 +932,73 @@ export default function AdminDashboard() {
                     {activeSection === 'pengaturan' && isAdmin && (
                         <div className="space-y-6">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Pengaturan Aplikasi</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Pengaturan Sistem</h2>
                                 <p className="text-gray-500 dark:text-gray-400 mt-1">Konfigurasi teknis dan pengaturan umum</p>
                             </div>
 
+                            {/* Maintenance Mode Toggle Card */}
+                            <div className={`rounded-xl border-2 p-6 transition-all ${(settings.maintenance_mode?.value === 'true' || settings.maintenance_mode?.value === true)
+                                ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-600'
+                                : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900'
+                                }`}>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${(settings.maintenance_mode?.value === 'true' || settings.maintenance_mode?.value === true)
+                                            ? 'bg-amber-200 dark:bg-amber-800/40'
+                                            : 'bg-gray-100 dark:bg-gray-800'
+                                            }`}>
+                                            <AlertCircle className={`w-6 h-6 ${(settings.maintenance_mode?.value === 'true' || settings.maintenance_mode?.value === true)
+                                                ? 'text-amber-600 dark:text-amber-400'
+                                                : 'text-gray-400'
+                                                }`} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 dark:text-white">Mode Maintenance</h3>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                {(settings.maintenance_mode?.value === 'true' || settings.maintenance_mode?.value === true)
+                                                    ? '⚠️ Maintenance AKTIF — Mahasiswa tidak bisa mengakses sistem'
+                                                    : 'Nonaktifkan akses mahasiswa sementara untuk pemeliharaan'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleToggleMaintenance}
+                                        disabled={actionLoading === 'maintenance'}
+                                        className={`relative w-14 h-7 rounded-full transition-all duration-300 ${(settings.maintenance_mode?.value === 'true' || settings.maintenance_mode?.value === true)
+                                            ? 'bg-amber-500'
+                                            : 'bg-gray-300 dark:bg-gray-700'
+                                            }`}
+                                    >
+                                        {actionLoading === 'maintenance' ? (
+                                            <Loader2 className="w-4 h-4 animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white" />
+                                        ) : (
+                                            <span className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all duration-300 ${(settings.maintenance_mode?.value === 'true' || settings.maintenance_mode?.value === true)
+                                                ? 'left-8' : 'left-1'
+                                                }`} />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Other Settings */}
                             <div className="space-y-4">
-                                {Object.entries(settings).map(([key, setting]) => (
-                                    <SettingRow
-                                        key={key}
-                                        settingKey={key}
-                                        value={typeof setting.value === 'string' ? setting.value : JSON.stringify(setting.value)}
-                                        description={setting.description}
-                                        onSave={handleSaveSetting}
-                                        isLoading={actionLoading === key}
-                                    />
-                                ))}
-                                {Object.keys(settings).length === 0 && (
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Pengaturan Lainnya</h3>
+                                {Object.entries(settings)
+                                    .filter(([key]) => key !== 'maintenance_mode' && key !== 'maintenance_message')
+                                    .map(([key, setting]) => (
+                                        <SettingRow
+                                            key={key}
+                                            settingKey={key}
+                                            value={typeof setting.value === 'string' ? setting.value : JSON.stringify(setting.value)}
+                                            description={setting.description}
+                                            onSave={handleSaveSetting}
+                                            isLoading={actionLoading === key}
+                                        />
+                                    ))}
+                                {Object.keys(settings).filter(k => k !== 'maintenance_mode' && k !== 'maintenance_message').length === 0 && (
                                     <div className="text-center py-12 text-gray-500 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
                                         <Settings className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                                        <p className="text-sm">Belum ada pengaturan. Jalankan migrasi database terlebih dahulu.</p>
+                                        <p className="text-sm">Belum ada pengaturan tambahan.</p>
                                     </div>
                                 )}
                             </div>
@@ -993,6 +1243,102 @@ export default function AdminDashboard() {
                     </div>
                 )
             }
+
+            {/* Student Edit Modal */}
+            {showEditStudentModal && editingStudent && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl">
+                        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Profil Mahasiswa</h3>
+                            <p className="text-sm text-gray-500 mt-1">{editingStudent.email}</p>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Nama Lengkap</label>
+                                <input type="text" className="input w-full" placeholder="Nama lengkap" value={studentEditForm.fullName} onChange={e => setStudentEditForm(f => ({ ...f, fullName: e.target.value }))} />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">NIM</label>
+                                <input type="text" className="input w-full" placeholder="NIM mahasiswa" value={studentEditForm.nim} onChange={e => setStudentEditForm(f => ({ ...f, nim: e.target.value }))} />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Program Studi</label>
+                                <select className="input w-full" value={studentEditForm.programStudi} onChange={e => setStudentEditForm(f => ({ ...f, programStudi: e.target.value }))}>
+                                    <option value="">Pilih program studi</option>
+                                    {jurusanList.map(j => (
+                                        <option key={j.id} value={j.nama}>{j.nama}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex gap-3 justify-end">
+                            <button onClick={() => { setShowEditStudentModal(false); setEditingStudent(null); }} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">Batal</button>
+                            <button
+                                onClick={handleSaveStudent}
+                                disabled={actionLoading === 'student-edit'}
+                                className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors"
+                            >
+                                {actionLoading === 'student-edit' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                Simpan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Ban/Unban Modal */}
+            {showBanModal && banTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl">
+                        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                {banTarget.is_banned ? 'Pulihkan Akses Mahasiswa' : 'Batasi Akses Mahasiswa'}
+                            </h3>
+                            <p className="text-sm text-gray-500 mt-1">{banTarget.full_name || banTarget.email}</p>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            {banTarget.is_banned ? (
+                                <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-xl p-4">
+                                    <p className="text-sm text-green-700 dark:text-green-300">
+                                        Akses akun ini akan dipulihkan dan mahasiswa bisa menggunakan sistem kembali.
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl p-4">
+                                        <p className="text-sm text-red-700 dark:text-red-300">
+                                            Mahasiswa tidak akan bisa mengakses sistem sampai akses dipulihkan.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Alasan Pembatasan</label>
+                                        <textarea
+                                            className="input w-full min-h-[80px] resize-none"
+                                            placeholder="Contoh: Pelanggaran aturan perpustakaan..."
+                                            value={banReasonInput}
+                                            onChange={e => setBanReasonInput(e.target.value)}
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex gap-3 justify-end">
+                            <button onClick={() => { setShowBanModal(false); setBanTarget(null); setBanReasonInput(''); }} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">Batal</button>
+                            <button
+                                onClick={handleBanStudent}
+                                disabled={actionLoading === 'ban' || (!banTarget.is_banned && !banReasonInput)}
+                                className={`px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors ${banTarget.is_banned
+                                        ? 'bg-green-600 hover:bg-green-500 text-white'
+                                        : 'bg-red-600 hover:bg-red-500 text-white'
+                                    }`}
+                            >
+                                {actionLoading === 'ban' ? <Loader2 className="w-4 h-4 animate-spin" /> : banTarget.is_banned ? <Check className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                                {banTarget.is_banned ? 'Pulihkan Akses' : 'Batasi Akses'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 }

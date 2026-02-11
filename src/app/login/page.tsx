@@ -50,6 +50,10 @@ export default function LoginPage() {
     const [adminIdentifier, setAdminIdentifier] = useState('');
     const [adminPassword, setAdminPassword] = useState('');
 
+    // Maintenance state
+    const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+    const [maintenanceMsg, setMaintenanceMsg] = useState('');
+
     // Initial check state
     const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
@@ -70,6 +74,22 @@ export default function LoginPage() {
         }, 5000);
         return () => clearInterval(interval);
     }, [shuffledImages.length]);
+
+    // Check maintenance mode on mount
+    useEffect(() => {
+        const supabase = createClient();
+        supabase.from('app_settings').select('key, value').in('key', ['maintenance_mode', 'maintenance_message'])
+            .then(({ data }) => {
+                const modeRow = data?.find(r => r.key === 'maintenance_mode');
+                const msgRow = data?.find(r => r.key === 'maintenance_message');
+                setIsMaintenanceMode(modeRow?.value === true || modeRow?.value === 'true');
+                setMaintenanceMsg(
+                    typeof msgRow?.value === 'string'
+                        ? msgRow.value.replace(/^\"|\"$/g, '')
+                        : 'Sistem sedang dalam pemeliharaan.'
+                );
+            });
+    }, []);
 
     // Handle auth callback errors from URL (e.g. identity_already_exists)
     useEffect(() => {
@@ -317,6 +337,17 @@ export default function LoginPage() {
                         <Home className="w-4 h-4" />
                         Kembali ke Beranda
                     </Link>
+
+                    {/* Maintenance Banner */}
+                    {isMaintenanceMode && loginMode === 'mahasiswa' && (
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-start gap-3">
+                            <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Sistem Dalam Pemeliharaan</p>
+                                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">{maintenanceMsg}</p>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Login Mode Tabs */}
                     <div className="bg-gray-100 dark:bg-gray-900 p-1 rounded-xl flex">

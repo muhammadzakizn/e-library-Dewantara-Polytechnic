@@ -195,7 +195,19 @@ export default function PengaturanPage() {
 
         // Immediate check from cache
         supabase.auth.getSession().then(({ data: { session } }) => {
-            handleUser(session?.user);
+            // Check if user is admin/dosen — redirect to admin dashboard
+            if (session?.user) {
+                supabase.from('profiles').select('role').eq('id', session.user.id).single()
+                    .then(({ data: profile }) => {
+                        if (profile?.role === 'admin' || profile?.role === 'dosen') {
+                            router.push('/admin/dashboard');
+                            return;
+                        }
+                        handleUser(session.user);
+                    });
+            } else {
+                handleUser(null);
+            }
 
             // Background refresh with fresh server data (5s timeout)
             if (session?.user) {
