@@ -80,23 +80,27 @@ export default function Header() {
         let profileName = '';
         let profileAvatar = '';
 
-        const fetchProfile = async (userId: string) => {
+        const fetchProfile = async (currentUser: SupabaseUser) => {
+            let role = 'mahasiswa';
+            // Check metadata/email for immediate feedback
+            if (currentUser.email === 'admin@polidewa.ac.id') role = 'admin';
+            else if (currentUser.user_metadata?.role) role = currentUser.user_metadata.role;
+
             try {
                 const { data: profile } = await supabase
                     .from('profiles')
                     .select('role, full_name, avatar_url')
-                    .eq('id', userId)
+                    .eq('id', currentUser.id)
                     .single();
                 if (mounted && profile) {
-                    setUserRole(profile?.role || 'mahasiswa');
-                    profileName = profile?.full_name || '';
-                    profileAvatar = profile?.avatar_url || '';
+                    if (profile.role) role = profile.role;
+                    profileName = profile.full_name || '';
+                    profileAvatar = profile.avatar_url || '';
                     // Force re-render by updating user state
                     setUser(prev => prev ? { ...prev, _profileName: profileName, _profileAvatar: profileAvatar } as any : prev);
                 }
-            } catch {
-                if (mounted) setUserRole('mahasiswa');
-            }
+            } catch { }
+            if (mounted) setUserRole(role);
         };
 
         // Step 1: Instant load from cache
@@ -104,7 +108,7 @@ export default function Header() {
             if (!mounted) return;
             if (session?.user) {
                 setUser(session.user);
-                fetchProfile(session.user.id);
+                fetchProfile(session.user);
             }
 
             // Step 2: Background refresh with fresh data (5s timeout)
@@ -125,7 +129,7 @@ export default function Header() {
             if (!mounted) return;
             setUser(session?.user ?? null);
             if (session?.user) {
-                fetchProfile(session.user.id);
+                fetchProfile(session.user);
             } else {
                 setUserRole(null);
             }
