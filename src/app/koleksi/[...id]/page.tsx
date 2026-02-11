@@ -19,6 +19,7 @@ import {
     Loader2
 } from 'lucide-react';
 import { getBookById, Book } from '@/lib/api/books';
+import NotFoundPage from '@/app/not-found';
 
 export default function BookDetailPage() {
     const params = useParams();
@@ -67,24 +68,7 @@ export default function BookDetailPage() {
     }
 
     if (error || !book) {
-        return (
-            <div className="min-h-screen pt-24 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <BookOpen className="w-10 h-10 text-gray-400" />
-                    </div>
-                    <h1 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">
-                        {error || 'Buku tidak ditemukan'}
-                    </h1>
-                    <p className="text-gray-500 dark:text-gray-400 mb-6">
-                        Buku yang Anda cari tidak dapat ditemukan
-                    </p>
-                    <Link href="/koleksi" className="btn-primary">
-                        Kembali ke Koleksi
-                    </Link>
-                </div>
-            </div>
-        );
+        return <NotFoundPage />;
     }
 
     return (

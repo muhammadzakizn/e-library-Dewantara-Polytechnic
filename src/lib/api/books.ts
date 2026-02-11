@@ -1,4 +1,5 @@
 // API Service for fetching books from Open Library and Google Books
+import { createClient } from '@/lib/supabase/client';
 
 export interface Book {
     id: string;
@@ -304,11 +305,57 @@ export async function getBooksByCategory(
     }
 }
 
+
+async function getSupabaseBookById(id: string): Promise<Book | null> {
+    const supabase = createClient();
+    
+    // Check all tables
+    const tables = ['buku', 'jurnal', 'modul_ajar', 'laporan_magang'];
+    
+    for (const table of tables) {
+        const { data, error } = await supabase
+            .from(table)
+            .select('*')
+            .eq('id', id)
+            .single();
+            
+        if (data && !error) {
+             let category: any = 'buku_digital';
+             if (table === 'jurnal') category = 'jurnal';
+             if (table === 'modul_ajar') category = 'modul';
+             if (table === 'laporan_magang') category = 'laporan_magang';
+
+             return {
+                id: data.id,
+                title: data.title || data.judul,
+                author: data.penulis || data.author || data.dosen_name || data.user_name || 'Unknown',
+                publisher: data.penerbit || data.company || 'Politeknik Dewantara',
+                year: parseInt(data.tahun_terbit || data.year || new Date(data.created_at).getFullYear().toString()),
+                coverUrl: data.cover_url || '/images/placeholder-book.png',
+                category: category,
+                description: data.deskripsi || data.description || '',
+                pageCount: 0,
+                language: 'id',
+                previewLink: data.file_url ? data.file_url : '#',
+                isbn: data.isbn || data.issn || '',
+                views: data.download_count || 0
+            };
+        }
+    }
+    return null;
+}
+
 /**
  * Get book details by ID (Google Books)
  */
 export async function getBookById(id: string): Promise<Book | null> {
     try {
+        // 1. Check if it's a Supabase UUID
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+            const supabaseBook = await getSupabaseBookById(id);
+            if (supabaseBook) return supabaseBook;
+        }
+
         // Check if it's an Open Library ID (starts with OL or contains works)
         if (id.includes('works/') || id.startsWith('OL')) {
             const cleanId = id.replace('works/', '');
