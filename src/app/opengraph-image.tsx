@@ -14,9 +14,10 @@ export default async function Image() {
     // Define the knowledge emojis for the background pattern
     const emojis = ['📚', '📖', '✏️', '🎓', '💡', '🏫', '📝', '🔬', '🧠', '💻'];
 
-    // Increase density for full background coverage
+    // Increase density significantly for full seamless background coverage
+    // 400 items ensures strict density
     const patternElements = [];
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 400; i++) {
         patternElements.push(emojis[i % emojis.length]);
     }
 
@@ -39,28 +40,42 @@ export default async function Image() {
                     overflow: 'hidden',
                 }}
             >
-                {/* Background Emoji Pattern - Full Coverage & Dense */}
+                {/* Background Emoji Pattern - EXTREME Density & Full Coverage */}
+                {/* zIndex: 0 ensures it stays behind everything */}
                 <div
                     style={{
                         position: 'absolute',
-                        inset: -100, // Negative inset to cover edges during rotation
+                        // Increase canvas size significantly to avoid edges during rotation
+                        width: '150%',
+                        height: '150%',
+                        top: '-25%',
+                        left: '-25%',
                         display: 'flex',
                         flexWrap: 'wrap',
                         justifyContent: 'center',
                         alignContent: 'center',
-                        gap: '30px',
-                        opacity: 0.12, // Slightly increased opacity for visibility "penuh di latar belakang"
+                        gap: '20px', // Tight gap
+                        opacity: 0.08, // Very subtle, "background" feel
                         transform: 'rotate(-12deg)',
+                        zIndex: 0,
+                        pointerEvents: 'none',
                     }}
                 >
                     {patternElements.map((emoji, i) => (
-                        <div key={i} style={{ fontSize: '50px', width: '90px', textAlign: 'center' }}>
+                        <div key={i} style={{
+                            fontSize: '40px',
+                            width: '70px',
+                            textAlign: 'center',
+                            // subtle text shadow to blend better
+                            textShadow: '0 0 10px rgba(255,255,255,0.1)'
+                        }}>
                             {emoji}
                         </div>
                     ))}
                 </div>
 
-                {/* Glass Container - Smaller Size */}
+                {/* Glass Container - Foreground */}
+                {/* zIndex: 20 ensures it stays ON TOP of the background pattern */}
                 <div
                     style={{
                         display: 'flex',
@@ -69,21 +84,22 @@ export default async function Image() {
                         justifyContent: 'center',
                         backgroundColor: 'rgba(255, 255, 255, 0.1)',
                         backdropFilter: 'blur(12px)',
-                        borderRadius: '24px', // Reduced radius
-                        padding: '40px 80px', // Reduced padding (was 60px 100px)
+                        borderRadius: '24px',
+                        padding: '40px 80px',
                         border: '1px solid rgba(255, 255, 255, 0.2)',
                         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-                        zIndex: 10,
-                        marginTop: '-20px', // Slight visual centering adjustment considering the footer
+                        zIndex: 20,
+                        marginTop: '-20px',
+                        position: 'relative', // Ensure z-index works
                     }}
                 >
-                    {/* Logo Container - Smaller */}
+                    {/* Logo Container */}
                     <div
                         style={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: '110px', // Reduced from 140px
+                            width: '110px',
                             height: '110px',
                             backgroundColor: 'white',
                             borderRadius: '24px',
@@ -104,7 +120,7 @@ export default async function Image() {
 
                     <h1
                         style={{
-                            fontSize: '56px', // Reduced from 64px
+                            fontSize: '56px',
                             fontWeight: 900,
                             color: 'white',
                             margin: '0 0 12px 0',
@@ -117,7 +133,7 @@ export default async function Image() {
                     </h1>
                     <p
                         style={{
-                            fontSize: '28px', // Reduced from 32px
+                            fontSize: '28px',
                             color: '#dbeafe',
                             margin: 0,
                             textAlign: 'center',
@@ -130,11 +146,12 @@ export default async function Image() {
                     </p>
                 </div>
 
-                {/* Footer Pill - Lowered & Spaced */}
+                {/* Footer Pill */}
+                {/* zIndex: 20 ensures it stays ON TOP of the background pattern */}
                 <div
                     style={{
                         position: 'absolute',
-                        bottom: '30px', // Moved down from 50px to 30px ("di bawahin dikit")
+                        bottom: '30px',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '10px',
@@ -142,7 +159,7 @@ export default async function Image() {
                         padding: '10px 24px',
                         borderRadius: '100px',
                         backdropFilter: 'blur(4px)',
-                        zIndex: 10,
+                        zIndex: 20,
                     }}
                 >
                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#4ade80', boxShadow: '0 0 10px #4ade80' }} />
