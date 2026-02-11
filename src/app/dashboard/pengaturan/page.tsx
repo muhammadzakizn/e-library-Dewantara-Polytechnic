@@ -171,41 +171,45 @@ export default function PengaturanPage() {
     const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(null);
 
     useEffect(() => {
+        let mounted = true;
         const supabase = createClient();
-        const getUser = async () => {
-            try {
-                const { data: { user }, error: authError } = await supabase.auth.getUser();
-                if (authError) throw authError;
 
-                if (!user) {
-                    router.push('/login');
-                    return;
-                }
-
-                // Check if admin/dosen — redirect them
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single();
-
-                if (profile?.role === 'admin' || profile?.role === 'dosen') {
-                    window.location.href = '/admin/dashboard';
-                    return;
-                }
-
-                setUser(user);
-                setFullName(user.user_metadata?.full_name || '');
-                setNim(user.user_metadata?.nim || '');
-                setProdi(user.user_metadata?.program_studi || '');
-                setCustomAvatarUrl(user.user_metadata?.custom_avatar_url || null);
-                setIsLoading(false);
-            } catch (error) {
-                console.error('Error in getUser:', error);
-                setIsLoading(false);
+        const handleUser = (sessionUser: import('@supabase/supabase-js').User | null | undefined) => {
+            if (!mounted) return;
+            if (!sessionUser) {
+                router.push('/login');
+                return;
             }
+            setUser(sessionUser);
+            setFullName(sessionUser.user_metadata?.full_name || '');
+            setNim(sessionUser.user_metadata?.nim || '');
+            setProdi(sessionUser.user_metadata?.program_studi || '');
+            setCustomAvatarUrl(sessionUser.user_metadata?.custom_avatar_url || null);
+            setIsLoading(false);
         };
-        getUser();
+
+        // Listen for auth state changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (_event, session) => handleUser(session?.user)
+        );
+
+        // Immediate check
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            handleUser(session?.user);
+        }).catch(() => {
+            if (mounted) setIsLoading(false);
+        });
+
+        // Safety timeout
+        const safetyTimer = setTimeout(() => {
+            if (mounted) setIsLoading(false);
+        }, 3000);
+
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+            clearTimeout(safetyTimer);
+        };
     }, [router]);
 
     const switchSection = (section: SettingsSection) => {

@@ -24,22 +24,38 @@ export default function UnggahLaporanPage() {
     const [description, setDescription] = useState('');
 
     useEffect(() => {
+        let mounted = true;
         const supabase = createClient();
-        const getUser = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                if (!mounted) return;
+                if (session?.user) {
+                    setUser(session.user);
+                    setIsLoading(false);
+                } else {
                     router.push('/login');
-                    return;
                 }
-                setUser(user);
-            } catch (err) {
-                console.error('Error fetching user:', err);
-            } finally {
-                setIsLoading(false);
             }
+        );
+
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!mounted) return;
+            if (session?.user) setUser(session.user);
+            setIsLoading(false);
+        }).catch(() => {
+            if (mounted) setIsLoading(false);
+        });
+
+        const safetyTimer = setTimeout(() => {
+            if (mounted) setIsLoading(false);
+        }, 3000);
+
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+            clearTimeout(safetyTimer);
         };
-        getUser();
     }, [router]);
 
     const handleSubmit = async (e: React.FormEvent) => {

@@ -131,28 +131,42 @@ export default function ProfilPage() {
     const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(null);
 
     useEffect(() => {
+        let mounted = true;
         const supabase = createClient();
 
-        const getUser = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    router.push('/login');
-                    return;
-                }
-                setUser(user);
-                setFullName(user.user_metadata?.full_name || '');
-                setNim(user.user_metadata?.nim || '');
-                setProdi(user.user_metadata?.program_studi || '');
-                setCustomAvatarUrl(user.user_metadata?.custom_avatar_url || null);
-            } catch (err) {
-                console.error('Error fetching user:', err);
-            } finally {
-                setIsLoading(false);
+        const handleUser = (sessionUser: import('@supabase/supabase-js').User | null | undefined) => {
+            if (!mounted) return;
+            if (!sessionUser) {
+                router.push('/login');
+                return;
             }
+            setUser(sessionUser);
+            setFullName(sessionUser.user_metadata?.full_name || '');
+            setNim(sessionUser.user_metadata?.nim || '');
+            setProdi(sessionUser.user_metadata?.program_studi || '');
+            setCustomAvatarUrl(sessionUser.user_metadata?.custom_avatar_url || null);
+            setIsLoading(false);
         };
 
-        getUser();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (_event, session) => handleUser(session?.user)
+        );
+
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            handleUser(session?.user);
+        }).catch(() => {
+            if (mounted) setIsLoading(false);
+        });
+
+        const safetyTimer = setTimeout(() => {
+            if (mounted) setIsLoading(false);
+        }, 3000);
+
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+            clearTimeout(safetyTimer);
+        };
     }, [router]);
 
     const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {

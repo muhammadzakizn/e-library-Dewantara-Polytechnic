@@ -41,9 +41,9 @@ export default function LaporanSayaPage() {
     const fetchLaporan = async () => {
         try {
             const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { session } } = await supabase.auth.getSession();
 
-            if (!user) {
+            if (!session?.user) {
                 router.push('/login');
                 return;
             }
@@ -51,7 +51,7 @@ export default function LaporanSayaPage() {
             const { data, error } = await supabase
                 .from('laporan_magang')
                 .select('*')
-                .eq('user_id', user.id)
+                .eq('user_id', session.user.id)
                 .order('created_at', { ascending: false });
 
             if (error) {
