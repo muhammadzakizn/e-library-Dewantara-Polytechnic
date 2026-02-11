@@ -4,13 +4,13 @@ import { usePathname } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
-const authRoutes = ['/login', '/daftar', '/lupa-password'];
+const noLayoutRoutes = ['/login', '/daftar', '/lupa-password', '/admin'];
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const isAuthPage = authRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
+    const isNoLayout = noLayoutRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
 
-    if (isAuthPage) {
+    if (isNoLayout) {
         return <>{children}</>;
     }
 
