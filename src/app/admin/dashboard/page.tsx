@@ -125,7 +125,7 @@ export default function AdminDashboard() {
                     user={currentProfile}
                 />
 
-                <div className="p-6 lg:p-8 pt-4 pb-20 max-w-7xl mx-auto">
+                <div className="p-6 lg:p-8 pt-4 pb-20 w-full">
                     {renderContent()}
                 </div>
             </main>
