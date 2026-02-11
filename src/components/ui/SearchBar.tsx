@@ -5,11 +5,27 @@ import { useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
 
 
+
 export interface SearchBarProps {
     onSearch?: (query: string) => void;
     showFilters?: boolean;
     placeholder?: string;
 }
+
+const searchPhrases = [
+    'buku...',
+    'jurnal...',
+    'modul...',
+    'laporan magang...',
+    'materi kuliah...',
+];
+
+const ACADEMIC_TERMS = [
+    'Desain Multimedia', 'Teknik Sipil', 'Teknologi Pangan', 'Elektronika Digital',
+    'Arsitektur Modern', 'Metalurgi', 'Mesin Otomotif', 'Algoritma Pemrograman',
+    'Metode Penelitian', 'Fisika Teknik', 'Gambar Teknik', 'Struktur Bangunan',
+    'AutoCAD', 'Mikrokontroler', 'Konstruksi Baja', 'Machine Learning'
+];
 
 export default function SearchBar({
     placeholder,
