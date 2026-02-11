@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
     BookOpen,
@@ -29,6 +30,8 @@ export default function DashboardPage() {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [profileData, setProfileData] = useState<{ full_name?: string; avatar_url?: string; nim?: string; program_studi?: string } | null>(null);
 
+    const router = useRouter();
+
     useEffect(() => {
         let mounted = true;
         const supabase = createClient();
@@ -37,10 +40,15 @@ export default function DashboardPage() {
             try {
                 const { data } = await supabase
                     .from('profiles')
-                    .select('full_name, avatar_url, nim, program_studi')
+                    .select('full_name, avatar_url, nim, program_studi, role')
                     .eq('id', userId)
                     .single();
                 if (mounted && data) {
+                    // Redirect admin/dosen to admin dashboard
+                    if (data.role === 'admin' || data.role === 'dosen') {
+                        router.replace('/admin/dashboard');
+                        return;
+                    }
                     setProfileData(data);
                 }
             } catch { }
