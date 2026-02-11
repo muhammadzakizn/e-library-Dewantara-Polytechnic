@@ -59,7 +59,6 @@ export default function LoginPage() {
     const [imageLoaded, setImageLoaded] = useState(true);
     const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
 
-    // Slideshow Effect
     useEffect(() => {
         const interval = setInterval(() => {
             setImageLoaded(false);
@@ -71,6 +70,42 @@ export default function LoginPage() {
         }, 5000);
         return () => clearInterval(interval);
     }, [shuffledImages.length]);
+
+    // Handle auth callback errors from URL (e.g. identity_already_exists)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const hash = window.location.hash;
+
+        // Check query params
+        const urlError = params.get('error');
+
+        // Check hash fragment (Supabase returns errors in hash)
+        let errorCode = '';
+        let errorDescription = '';
+        if (hash) {
+            const hashParams = new URLSearchParams(hash.replace('#', ''));
+            errorCode = hashParams.get('error_code') || '';
+            errorDescription = hashParams.get('error_description') || '';
+        }
+
+        if (urlError || errorCode) {
+            // Map error codes to user-friendly Indonesian messages
+            const errorMessages: Record<string, string> = {
+                'identity_already_exists': 'Akun ini sudah ditautkan ke pengguna lain. Silakan gunakan akun yang berbeda.',
+                'identity_not_found': 'Identitas tidak ditemukan.',
+                'user_already_exists': 'Pengguna dengan email ini sudah terdaftar.',
+                'manual_linking_disabled': 'Penautan akun secara manual tidak diaktifkan.',
+            };
+
+            const friendlyMessage = errorMessages[errorCode] ||
+                (errorDescription ? decodeURIComponent(errorDescription.replace(/\+/g, ' ')) : 'Terjadi kesalahan saat autentikasi.');
+
+            setError(friendlyMessage);
+
+            // Clean the URL
+            window.history.replaceState({}, '', '/login');
+        }
+    }, []);
 
     // Reset states when switching mode
     const handleModeSwitch = (mode: 'mahasiswa' | 'admin') => {

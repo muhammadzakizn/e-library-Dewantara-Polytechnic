@@ -69,40 +69,66 @@ export default function Header() {
     }, []);
 
     useEffect(() => {
+        let mounted = true;
         const supabase = createClient();
+        let profileName = '';
+        let profileAvatar = '';
 
-        const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-
-            if (user) {
+        const fetchProfile = async (userId: string) => {
+            try {
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
+                    .select('role, full_name, avatar_url')
+                    .eq('id', userId)
                     .single();
-                setUserRole(profile?.role || 'mahasiswa');
+                if (mounted && profile) {
+                    setUserRole(profile?.role || 'mahasiswa');
+                    profileName = profile?.full_name || '';
+                    profileAvatar = profile?.avatar_url || '';
+                    // Force re-render by updating user state
+                    setUser(prev => prev ? { ...prev, _profileName: profileName, _profileAvatar: profileAvatar } as any : prev);
+                }
+            } catch {
+                if (mounted) setUserRole('mahasiswa');
             }
         };
 
-        getUser();
+        // Step 1: Instant load from cache
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!mounted) return;
+            if (session?.user) {
+                setUser(session.user);
+                fetchProfile(session.user.id);
+            }
+
+            // Step 2: Background refresh with fresh data (5s timeout)
+            if (session?.user) {
+                Promise.race([
+                    supabase.auth.getUser(),
+                    new Promise((_, reject) => setTimeout(() => reject('timeout'), 5000))
+                ]).then((result: any) => {
+                    if (mounted && result?.data?.user) {
+                        setUser(result.data.user);
+                    }
+                }).catch(() => { });
+            }
+        });
 
         // Listen for auth state changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (!mounted) return;
             setUser(session?.user ?? null);
             if (session?.user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', session.user.id)
-                    .single();
-                setUserRole(profile?.role || 'mahasiswa');
+                fetchProfile(session.user.id);
             } else {
                 setUserRole(null);
             }
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
     const toggleDarkMode = () => {
@@ -124,8 +150,8 @@ export default function Header() {
         return pathname.startsWith(href);
     };
 
-    const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
-    const userAvatar = user?.user_metadata?.avatar_url || null;
+    const userName = (user as any)?._profileName || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '';
+    const userAvatar = user?.user_metadata?.custom_avatar_url || (user as any)?._profileAvatar || user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
     const dashboardLink = (userRole === 'admin' || userRole === 'dosen') ? '/admin/dashboard' : '/dashboard';
 
     return (

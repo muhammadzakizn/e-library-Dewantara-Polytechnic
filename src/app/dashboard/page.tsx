@@ -25,10 +25,24 @@ export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [profileData, setProfileData] = useState<{ full_name?: string; avatar_url?: string; nim?: string; program_studi?: string } | null>(null);
 
     useEffect(() => {
         let mounted = true;
         const supabase = createClient();
+
+        const fetchProfile = async (userId: string) => {
+            try {
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('full_name, avatar_url, nim, program_studi')
+                    .eq('id', userId)
+                    .single();
+                if (mounted && data) {
+                    setProfileData(data);
+                }
+            } catch { }
+        };
 
         // Listen for auth state changes — this is reactive and never hangs
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -38,6 +52,7 @@ export default function DashboardPage() {
                 if (session?.user) {
                     setUser(session.user);
                     setIsLoading(false);
+                    fetchProfile(session.user.id);
                 } else {
                     setUser(null);
                     setIsLoading(false);
@@ -50,12 +65,12 @@ export default function DashboardPage() {
             if (!mounted) return;
             if (session?.user) {
                 setUser(session.user);
+                fetchProfile(session.user.id);
             }
             setIsLoading(false);
 
             // Step 2: Background refresh with fresh server data (with timeout)
             if (session?.user) {
-                const timeout = setTimeout(() => { }, 5000);
                 Promise.race([
                     supabase.auth.getUser(),
                     new Promise((_, reject) => setTimeout(() => reject('timeout'), 5000))
@@ -63,9 +78,7 @@ export default function DashboardPage() {
                     if (mounted && result?.data?.user) {
                         setUser(result.data.user);
                     }
-                }).catch(() => {
-                    // Timeout or error — keep cached data, no problem
-                }).finally(() => clearTimeout(timeout));
+                }).catch(() => { });
             }
         }).catch(() => {
             if (mounted) setIsLoading(false);
@@ -89,11 +102,12 @@ export default function DashboardPage() {
         window.location.href = '/login';
     };
 
-    const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Pengguna';
+    // Use profile data as primary source, user_metadata as fallback
+    const userName = profileData?.full_name || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Pengguna';
     const userEmail = user?.email || '';
-    const userAvatar = user?.user_metadata?.avatar_url || null;
-    const userNim = user?.user_metadata?.nim || '';
-    const userProdi = user?.user_metadata?.program_studi || '';
+    const userAvatar = user?.user_metadata?.custom_avatar_url || profileData?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
+    const userNim = profileData?.nim || user?.user_metadata?.nim || '';
+    const userProdi = profileData?.program_studi || user?.user_metadata?.program_studi || '';
 
     if (isLoading) {
         return (

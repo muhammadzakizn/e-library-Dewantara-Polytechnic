@@ -224,6 +224,22 @@ export default function PengaturanPage() {
         };
     }, [router]);
 
+    // Handle auth callback errors from URL (e.g., identity linking failed)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const errorMsg = params.get('error');
+        const tab = params.get('tab');
+
+        if (errorMsg) {
+            setMessage({ type: 'error', text: decodeURIComponent(errorMsg) });
+            // Clean the URL without reloading
+            window.history.replaceState({}, '', '/dashboard/pengaturan' + (tab ? `?tab=${tab}` : ''));
+        }
+        if (tab === 'akun') {
+            setActiveSection('akun');
+        }
+    }, []);
+
     const switchSection = (section: SettingsSection) => {
         setActiveSection(section);
         setMessage(null);
