@@ -29,56 +29,66 @@ export default function DashboardPage() {
     useEffect(() => {
         let mounted = true;
         let isRedirecting = false;
-
-        // Show retry button after 8 seconds as safety net
-        const retryTimer = setTimeout(() => {
-            if (mounted && !isRedirecting) setShowRetry(true);
-        }, 8000);
-
         const supabase = createClient();
 
-        const getUser = async () => {
-            try {
-                const { data: { user }, error: authError } = await supabase.auth.getUser();
-                if (authError) throw authError;
+        // Safety net: if nothing loads in 10s, show retry button
+        const retryTimer = setTimeout(() => {
+            if (mounted && !isRedirecting) setShowRetry(true);
+        }, 10000);
 
-                if (user) {
-                    const { data: profile, error: profileError } = await supabase
-                        .from('profiles')
-                        .select('role')
-                        .eq('id', user.id)
-                        .single();
+        // Timeout: force stop loading after 15s
+        const forceTimer = setTimeout(() => {
+            if (mounted && !isRedirecting) {
+                console.warn('Dashboard: force stopping loading due to timeout');
+                setIsLoading(false);
+            }
+        }, 15000);
 
-                    if (profileError && profileError.code !== 'PGRST116') {
-                        console.error('Error fetching profile:', profileError);
-                    }
-
-                    if (profile?.role === 'admin' || profile?.role === 'dosen') {
-                        // Keep loading state while redirecting — don't render empty dashboard
-                        isRedirecting = true;
-                        window.location.href = '/admin/dashboard';
-                        return;
-                    }
-                }
-
+        const checkUserRole = async (sessionUser: SupabaseUser | null) => {
+            if (!sessionUser) {
                 if (mounted) {
-                    setUser(user);
+                    setUser(null);
                     setIsLoading(false);
                 }
-            } catch (error) {
-                console.error('Error in getUser:', error);
-                // Only stop loading on error if not redirecting
-                if (mounted && !isRedirecting) {
-                    setIsLoading(false);
+                return;
+            }
+
+            try {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', sessionUser.id)
+                    .single();
+
+                if (profile?.role === 'admin' || profile?.role === 'dosen') {
+                    isRedirecting = true;
+                    window.location.href = '/admin/dashboard';
+                    return;
                 }
+            } catch (err) {
+                console.error('Error checking role:', err);
+            }
+
+            if (mounted && !isRedirecting) {
+                setUser(sessionUser);
+                setIsLoading(false);
             }
         };
 
-        getUser();
+        // Use getSession (cached, instant) instead of getUser (server call that hangs)
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (mounted) {
+                checkUserRole(session?.user ?? null);
+            }
+        }).catch((err) => {
+            console.error('Error getting session:', err);
+            if (mounted) setIsLoading(false);
+        });
 
         return () => {
             mounted = false;
             clearTimeout(retryTimer);
+            clearTimeout(forceTimer);
         };
     }, []);
 
