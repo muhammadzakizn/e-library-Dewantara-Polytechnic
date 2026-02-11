@@ -8,13 +8,14 @@ import {
     Shield, Plus, Pencil, Trash2, Check, X, Loader2, ChevronRight,
     LayoutDashboard, UserPlus, ClipboardCheck, Eye, EyeOff, Save,
     AlertCircle, CheckCircle2, Clock, XCircle, Search, BarChart3,
-    Lock, KeyRound, UserCog
+    Lock, KeyRound, UserCog, Upload, Image as ImageIcon, File
 } from 'lucide-react';
 
-type AdminSection = 'beranda' | 'jurusan' | 'akun' | 'mahasiswa' | 'laporan' | 'pengaturan';
+type AdminSection = 'beranda' | 'jurusan' | 'akun' | 'mahasiswa' | 'modul' | 'laporan' | 'pengaturan';
 type Profile = { id: string; email: string; full_name: string; role: string; username: string; jurusan_id: string; permissions: any; created_at: string; is_banned?: boolean; ban_reason?: string; banned_at?: string; nim?: string; program_studi?: string; avatar_url?: string; };
 type Jurusan = { id: string; nama: string; kode: string; jenjang: string; is_active: boolean; };
 type LaporanMagang = { id: string; title: string; company: string; user_name: string; user_nim: string; user_prodi: string; status: string; created_at: string; approved_by: string; approved_at: string; rejection_reason: string; jurusan_id: string; };
+type ModulAjar = { id: string; judul: string; deskripsi: string; dosen_name: string; dosen_id: string; jurusan_id: string | null; jurusan_nama: string; mata_kuliah: string; semester: string; tahun_ajaran: string; cover_url: string; file_url: string; file_name: string; file_size: number; status: string; download_count: number; created_at: string; updated_at: string; };
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -28,6 +29,7 @@ export default function AdminDashboard() {
     const [adminList, setAdminList] = useState<Profile[]>([]);
     const [studentList, setStudentList] = useState<Profile[]>([]);
     const [laporanList, setLaporanList] = useState<LaporanMagang[]>([]);
+    const [modulList, setModulList] = useState<ModulAjar[]>([]);
     const [settings, setSettings] = useState<Record<string, any>>({});
     const [stats, setStats] = useState({ users: 0, admins: 0, reports: 0, pendingReports: 0 });
 
@@ -44,11 +46,13 @@ export default function AdminDashboard() {
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [showEditStudentModal, setShowEditStudentModal] = useState(false);
     const [showBanModal, setShowBanModal] = useState(false);
+    const [showModulModal, setShowModulModal] = useState(false);
     const [editingJurusan, setEditingJurusan] = useState<Jurusan | null>(null);
     const [selectedLaporan, setSelectedLaporan] = useState<LaporanMagang | null>(null);
     const [editingAccount, setEditingAccount] = useState<Profile | null>(null);
     const [passwordTarget, setPasswordTarget] = useState<Profile | null>(null);
     const [editingStudent, setEditingStudent] = useState<Profile | null>(null);
+    const [editingModul, setEditingModul] = useState<ModulAjar | null>(null);
     const [banTarget, setBanTarget] = useState<Profile | null>(null);
 
     // Form states
@@ -62,6 +66,11 @@ export default function AdminDashboard() {
     const [studentEditForm, setStudentEditForm] = useState({ fullName: '', nim: '', programStudi: '' });
     const [banReasonInput, setBanReasonInput] = useState('');
     const [studentSearch, setStudentSearch] = useState('');
+    const [modulForm, setModulForm] = useState({ judul: '', deskripsi: '', mataKuliah: '', semester: '', tahunAjaran: '', jurusanId: '', status: 'published' });
+    const [modulSearch, setModulSearch] = useState('');
+    const [modulFilterJurusan, setModulFilterJurusan] = useState('');
+    const [modulCoverFile, setModulCoverFile] = useState<File | null>(null);
+    const [modulDocFile, setModulDocFile] = useState<File | null>(null);
 
     const supabase = createClient();
 
@@ -132,6 +141,19 @@ export default function AdminDashboard() {
                 }
                 const { data } = await query;
                 setLaporanList(data || []);
+            }
+            if (activeSection === 'modul' || activeSection === 'beranda') {
+                let query = supabase.from('modul_ajar').select('*').order('created_at', { ascending: false });
+                if (currentProfile?.role === 'dosen' && currentProfile?.jurusan_id) {
+                    query = query.eq('jurusan_id', currentProfile.jurusan_id);
+                }
+                const { data } = await query;
+                setModulList(data || []);
+                // Also load jurusan for the form
+                if (activeSection === 'modul' && jurusanList.length === 0) {
+                    const { data: jData } = await supabase.from('jurusan').select('*').order('nama');
+                    setJurusanList(jData || []);
+                }
             }
             if (activeSection === 'pengaturan') {
                 const { data } = await supabase.from('app_settings').select('*');
@@ -417,6 +439,7 @@ export default function AdminDashboard() {
         { key: 'jurusan', label: 'Kelola Jurusan', icon: GraduationCap, adminOnly: true },
         { key: 'akun', label: 'Kelola Admin/Dosen', icon: UserCog, adminOnly: true },
         { key: 'mahasiswa', label: 'Kelola Mahasiswa', icon: GraduationCap, adminOnly: true },
+        { key: 'modul', label: 'Modul Ajar', icon: BookOpen },
         { key: 'laporan', label: 'Laporan Magang', icon: ClipboardCheck },
         { key: 'pengaturan', label: 'Pengaturan Sistem', icon: Settings, adminOnly: true },
     ];
@@ -928,6 +951,110 @@ export default function AdminDashboard() {
                         </div>
                     )}
 
+                    {/* ==================== MODUL AJAR ==================== */}
+                    {activeSection === 'modul' && (
+                        <div className="space-y-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Modul Ajar</h2>
+                                    <p className="text-sm text-gray-500 mt-1">{currentProfile?.role === 'dosen' ? 'Kelola modul ajar jurusan Anda' : 'Kelola seluruh modul ajar'}</p>
+                                </div>
+                                <button onClick={() => { setEditingModul(null); setModulForm({ judul: '', deskripsi: '', mataKuliah: '', semester: '', tahunAjaran: '', jurusanId: currentProfile?.jurusan_id || '', status: 'published' }); setModulCoverFile(null); setModulDocFile(null); setShowModulModal(true); }} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors self-start">
+                                    <Plus className="w-4 h-4" /> Upload Modul
+                                </button>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <input type="text" placeholder="Cari modul..." className="input w-full pl-10" value={modulSearch} onChange={e => setModulSearch(e.target.value)} />
+                                </div>
+                                {isAdmin && (
+                                    <select className="input w-full sm:w-48" value={modulFilterJurusan} onChange={e => setModulFilterJurusan(e.target.value)}>
+                                        <option value="">Semua Jurusan</option>
+                                        {jurusanList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                                    </select>
+                                )}
+                            </div>
+
+                            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50 dark:bg-gray-800/50">
+                                            <tr>
+                                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">Modul</th>
+                                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3 hidden md:table-cell">Mata Kuliah</th>
+                                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3 hidden lg:table-cell">Jurusan</th>
+                                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3 hidden sm:table-cell">Dosen</th>
+                                                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">Status</th>
+                                                <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                            {modulList
+                                                .filter(m => {
+                                                    const q = modulSearch.toLowerCase();
+                                                    const matchSearch = !q || m.judul?.toLowerCase().includes(q) || m.dosen_name?.toLowerCase().includes(q) || m.mata_kuliah?.toLowerCase().includes(q);
+                                                    const matchJurusan = !modulFilterJurusan || m.jurusan_id === modulFilterJurusan;
+                                                    return matchSearch && matchJurusan;
+                                                })
+                                                .map(m => (
+                                                    <tr key={m.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-3">
+                                                                {m.cover_url ? (
+                                                                    <img src={m.cover_url} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                                                                ) : (
+                                                                    <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                                                                        <BookOpen className="w-5 h-5 text-blue-500" />
+                                                                    </div>
+                                                                )}
+                                                                <div className="min-w-0">
+                                                                    <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{m.judul}</p>
+                                                                    <p className="text-xs text-gray-500 truncate">{m.semester} - {m.tahun_ajaran}</p>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 hidden md:table-cell">{m.mata_kuliah || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 hidden lg:table-cell">{m.jurusan_nama || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 hidden sm:table-cell">{m.dosen_name}</td>
+                                                        <td className="px-6 py-4">
+                                                            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${m.status === 'published' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
+                                                                m.status === 'draft' ? 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' :
+                                                                    'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+                                                                }`}>{m.status === 'published' ? 'Dipublikasi' : m.status === 'draft' ? 'Draf' : 'Diarsipkan'}</span>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-right">
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <button onClick={() => { setEditingModul(m); setModulForm({ judul: m.judul, deskripsi: m.deskripsi || '', mataKuliah: m.mata_kuliah || '', semester: m.semester || '', tahunAjaran: m.tahun_ajaran || '', jurusanId: m.jurusan_id || '', status: m.status }); setModulCoverFile(null); setModulDocFile(null); setShowModulModal(true); }} className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg text-blue-600 transition-colors" title="Edit">
+                                                                    <Pencil className="w-4 h-4" />
+                                                                </button>
+                                                                {m.file_url && (
+                                                                    <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg text-green-600 transition-colors" title="Download">
+                                                                        <File className="w-4 h-4" />
+                                                                    </a>
+                                                                )}
+                                                                <button onClick={async () => { if (!confirm('Hapus modul ini?')) return; setActionLoading('delete-modul-' + m.id); const supabase = createClient(); await supabase.from('modul_ajar').delete().eq('id', m.id); setModulList(prev => prev.filter(x => x.id !== m.id)); setActionLoading(null); setSuccessMsg('Modul berhasil dihapus'); }} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500 transition-colors" title="Hapus">
+                                                                    {actionLoading === 'delete-modul-' + m.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {modulList.length === 0 && (
+                                    <div className="text-center py-12 text-gray-400">
+                                        <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                                        <p className="text-sm">Belum ada modul ajar.</p>
+                                        <p className="text-xs mt-1">Klik "Upload Modul" untuk menambahkan.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* ==================== PENGATURAN ==================== */}
                     {activeSection === 'pengaturan' && isAdmin && (
                         <div className="space-y-6">
@@ -1328,12 +1455,189 @@ export default function AdminDashboard() {
                                 onClick={handleBanStudent}
                                 disabled={actionLoading === 'ban' || (!banTarget.is_banned && !banReasonInput)}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors ${banTarget.is_banned
-                                        ? 'bg-green-600 hover:bg-green-500 text-white'
-                                        : 'bg-red-600 hover:bg-red-500 text-white'
+                                    ? 'bg-green-600 hover:bg-green-500 text-white'
+                                    : 'bg-red-600 hover:bg-red-500 text-white'
                                     }`}
                             >
                                 {actionLoading === 'ban' ? <Loader2 className="w-4 h-4 animate-spin" /> : banTarget.is_banned ? <Check className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                                 {banTarget.is_banned ? 'Pulihkan Akses' : 'Batasi Akses'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ==================== MODUL AJAR MODAL ==================== */}
+            {showModulModal && (
+                <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4" onClick={() => setShowModulModal(false)}>
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{editingModul ? 'Edit Modul Ajar' : 'Upload Modul Ajar'}</h3>
+                            <button onClick={() => setShowModulModal(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Judul Modul *</label>
+                                <input type="text" className="input w-full" placeholder="Contoh: Pemrograman Web Dasar" value={modulForm.judul} onChange={e => setModulForm(p => ({ ...p, judul: e.target.value }))} />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Deskripsi</label>
+                                <textarea className="input w-full min-h-[80px] resize-none" placeholder="Deskripsi singkat mengenai modul ini..." value={modulForm.deskripsi} onChange={e => setModulForm(p => ({ ...p, deskripsi: e.target.value }))} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Mata Kuliah</label>
+                                    <input type="text" className="input w-full" placeholder="Contoh: Algoritma" value={modulForm.mataKuliah} onChange={e => setModulForm(p => ({ ...p, mataKuliah: e.target.value }))} />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Semester</label>
+                                    <select className="input w-full" value={modulForm.semester} onChange={e => setModulForm(p => ({ ...p, semester: e.target.value }))}>
+                                        <option value="">Pilih Semester</option>
+                                        {['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8'].map(s => <option key={s} value={s}>{s}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Tahun Ajaran</label>
+                                    <input type="text" className="input w-full" placeholder="Contoh: 2025/2026" value={modulForm.tahunAjaran} onChange={e => setModulForm(p => ({ ...p, tahunAjaran: e.target.value }))} />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Jurusan</label>
+                                    <select className="input w-full" value={modulForm.jurusanId} onChange={e => setModulForm(p => ({ ...p, jurusanId: e.target.value }))} disabled={currentProfile?.role === 'dosen'}>
+                                        <option value="">Pilih Jurusan</option>
+                                        {jurusanList.map(j => <option key={j.id} value={j.id}>{j.nama}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Status</label>
+                                <select className="input w-full" value={modulForm.status} onChange={e => setModulForm(p => ({ ...p, status: e.target.value }))}>
+                                    <option value="published">Dipublikasi</option>
+                                    <option value="draft">Draf</option>
+                                    <option value="archived">Diarsipkan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">Foto Cover</label>
+                                <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
+                                    {modulCoverFile ? (
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                                <ImageIcon className="w-4 h-4" />
+                                                <span className="truncate">{modulCoverFile.name}</span>
+                                            </div>
+                                            <button onClick={() => setModulCoverFile(null)} className="text-red-500 hover:text-red-700"><X className="w-4 h-4" /></button>
+                                        </div>
+                                    ) : (
+                                        <label className="cursor-pointer">
+                                            <ImageIcon className="w-8 h-8 text-gray-300 mx-auto mb-1" />
+                                            <span className="text-xs text-gray-400">Klik untuk upload gambar cover</span>
+                                            <input type="file" accept="image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) setModulCoverFile(e.target.files[0]); }} />
+                                        </label>
+                                    )}
+                                    {!modulCoverFile && editingModul?.cover_url && <p className="text-xs text-blue-500 mt-1">Cover saat ini sudah ada</p>}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">File Modul (PDF/DOC)</label>
+                                <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
+                                    {modulDocFile ? (
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                                <File className="w-4 h-4" />
+                                                <span className="truncate">{modulDocFile.name}</span>
+                                            </div>
+                                            <button onClick={() => setModulDocFile(null)} className="text-red-500 hover:text-red-700"><X className="w-4 h-4" /></button>
+                                        </div>
+                                    ) : (
+                                        <label className="cursor-pointer">
+                                            <Upload className="w-8 h-8 text-gray-300 mx-auto mb-1" />
+                                            <span className="text-xs text-gray-400">Klik untuk upload file modul</span>
+                                            <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" className="hidden" onChange={e => { if (e.target.files?.[0]) setModulDocFile(e.target.files[0]); }} />
+                                        </label>
+                                    )}
+                                    {!modulDocFile && editingModul?.file_name && <p className="text-xs text-blue-500 mt-1">File saat ini: {editingModul.file_name}</p>}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex gap-3 justify-end">
+                            <button onClick={() => setShowModulModal(false)} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">Batal</button>
+                            <button
+                                onClick={async () => {
+                                    if (!modulForm.judul) { setErrorMsg('Judul modul wajib diisi'); return; }
+                                    setActionLoading('save-modul');
+                                    try {
+                                        const supabase = createClient();
+                                        let coverUrl = editingModul?.cover_url || '';
+                                        let fileUrl = editingModul?.file_url || '';
+                                        let fileName = editingModul?.file_name || '';
+                                        let fileSize = editingModul?.file_size || 0;
+
+                                        // Upload cover if new file selected
+                                        if (modulCoverFile) {
+                                            const ext = modulCoverFile.name.split('.').pop();
+                                            const path = `covers/${Date.now()}.${ext}`;
+                                            const { data: upData, error: upError } = await supabase.storage.from('modul-ajar').upload(path, modulCoverFile);
+                                            if (upError) throw upError;
+                                            const { data: urlData } = supabase.storage.from('modul-ajar').getPublicUrl(path);
+                                            coverUrl = urlData.publicUrl;
+                                        }
+
+                                        // Upload doc file if new file selected
+                                        if (modulDocFile) {
+                                            const ext = modulDocFile.name.split('.').pop();
+                                            const path = `files/${Date.now()}.${ext}`;
+                                            const { data: upData, error: upError } = await supabase.storage.from('modul-ajar').upload(path, modulDocFile);
+                                            if (upError) throw upError;
+                                            const { data: urlData } = supabase.storage.from('modul-ajar').getPublicUrl(path);
+                                            fileUrl = urlData.publicUrl;
+                                            fileName = modulDocFile.name;
+                                            fileSize = modulDocFile.size;
+                                        }
+
+                                        const jurusanNama = jurusanList.find(j => j.id === modulForm.jurusanId)?.nama || '';
+
+                                        const modulData = {
+                                            judul: modulForm.judul,
+                                            deskripsi: modulForm.deskripsi,
+                                            dosen_name: currentProfile?.full_name || 'Admin',
+                                            dosen_id: currentUser?.id,
+                                            jurusan_id: modulForm.jurusanId || null,
+                                            jurusan_nama: jurusanNama,
+                                            mata_kuliah: modulForm.mataKuliah,
+                                            semester: modulForm.semester,
+                                            tahun_ajaran: modulForm.tahunAjaran,
+                                            cover_url: coverUrl,
+                                            file_url: fileUrl,
+                                            file_name: fileName,
+                                            file_size: fileSize,
+                                            status: modulForm.status,
+                                            updated_at: new Date().toISOString(),
+                                        };
+
+                                        if (editingModul) {
+                                            const { error } = await supabase.from('modul_ajar').update(modulData).eq('id', editingModul.id);
+                                            if (error) throw error;
+                                            setModulList(prev => prev.map(m => m.id === editingModul.id ? { ...m, ...modulData } : m));
+                                            setSuccessMsg('Modul berhasil diperbarui');
+                                        } else {
+                                            const { data: newModul, error } = await supabase.from('modul_ajar').insert(modulData).select().single();
+                                            if (error) throw error;
+                                            setModulList(prev => [newModul, ...prev]);
+                                            setSuccessMsg('Modul berhasil ditambahkan');
+                                        }
+                                        setShowModulModal(false);
+                                    } catch (err: any) {
+                                        setErrorMsg(err.message || 'Gagal menyimpan modul');
+                                    }
+                                    setActionLoading(null);
+                                }}
+                                disabled={actionLoading === 'save-modul' || !modulForm.judul}
+                                className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors"
+                            >
+                                {actionLoading === 'save-modul' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                {editingModul ? 'Simpan Perubahan' : 'Upload Modul'}
                             </button>
                         </div>
                     </div>

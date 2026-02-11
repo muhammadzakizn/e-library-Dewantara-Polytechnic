@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
 
 interface SearchBarProps {
+    placeholder?: string;
     onSearch?: (query: string) => void;
     showFilters?: boolean;
 }
@@ -25,6 +26,7 @@ const ACADEMIC_TERMS = [
 ];
 
 export default function SearchBar({
+    placeholder,
     onSearch,
     showFilters = false,
 }: SearchBarProps) {
@@ -116,7 +118,7 @@ export default function SearchBar({
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Delay to allow clear button click
-                    placeholder={`Cari ${displayText}`}
+                    placeholder={placeholder || `Cari ${displayText}`}
                     className="w-full py-5 pl-14 pr-32 text-base bg-transparent border-none outline-none text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                 />
 
