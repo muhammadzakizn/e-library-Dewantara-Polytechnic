@@ -228,200 +228,226 @@ export default function NotFound() {
             </div>
 
             {/* Main content */}
-            <div className="relative z-10 pt-24 pb-20">
-                <div className="max-w-2xl mx-auto px-4 text-center">
+            <div className="relative z-10 w-full min-h-screen flex flex-col items-center justify-center overflow-hidden">
 
-                    {/* 404 Header */}
-                    {/* 404 Header & Game Trigger */}
-                    {!showGame ? (
-                        <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
-                            <div className="relative group cursor-pointer mb-8" onClick={() => setShowGame(true)}>
-                                <div className="flex items-center justify-center text-[150px] md:text-[220px] font-black leading-none tracking-tighter select-none">
-                                    <span className="bg-gradient-to-br from-gray-300 to-gray-500 dark:from-gray-700 dark:to-gray-500 bg-clip-text text-transparent transform group-hover:-translate-x-4 transition-transform duration-500">4</span>
+                {/* 404 Content Layer - Explodes outward */}
+                <div className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-1000 ease-[cubic-bezier(0.4,0,0.2,1)] ${showGame ? 'pointer-events-none' : 'z-20'}`}>
 
-                                    {/* The Interactive Zero */}
-                                    <div className="relative mx-2 md:mx-4 transform group-hover:scale-110 transition-all duration-500 ease-out z-10">
-                                        <span className="bg-gradient-to-br from-primary-500 to-blue-600 bg-clip-text text-transparent">0</span>
-                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <div className="w-20 h-20 md:w-32 md:h-32 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                                                <div className="w-0 h-0 border-t-[15px] border-t-transparent border-l-[30px] border-l-white border-b-[15px] border-b-transparent ml-2"></div>
-                                            </div>
-                                        </div>
-                                        {/* Glow effect */}
-                                        <div className="absolute inset-0 bg-primary-500/30 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+                    {/* The Big 404 */}
+                    <div className="relative group cursor-pointer mb-12" onClick={() => setShowGame(true)}>
+                        <div className="flex items-center justify-center text-[150px] md:text-[240px] font-black leading-none tracking-tighter select-none">
+                            {/* Left 4 */}
+                            <span className={`transform transition-all duration-1000 ease-in-out bg-gradient-to-br from-gray-300 to-gray-500 dark:from-gray-700 dark:to-gray-500 bg-clip-text text-transparent ${showGame ? '-translate-x-[100vw] -translate-y-[100vh] rotate-[-45deg] opacity-0 scale-50' : 'translate-0'}`}>
+                                4
+                            </span>
+
+                            {/* Center 0 (Trigger) */}
+                            <div className={`relative mx-2 md:mx-6 transform transition-all duration-700 ease-out z-10 ${showGame ? 'scale-[5] opacity-0 rotate-[180deg] blur-xl' : 'scale-100 group-hover:scale-110'}`}>
+                                <span className="bg-gradient-to-br from-primary-500 to-blue-600 bg-clip-text text-transparent animate-pulse">0</span>
+                                {/* Hover Play Icon */}
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg border border-white/20">
+                                        <div className="w-0 h-0 border-t-[20px] border-t-transparent border-l-[35px] border-l-white border-b-[20px] border-b-transparent ml-2"></div>
                                     </div>
-
-                                    <span className="bg-gradient-to-br from-gray-300 to-gray-500 dark:from-gray-700 dark:to-gray-500 bg-clip-text text-transparent transform group-hover:translate-x-4 transition-transform duration-500">4</span>
                                 </div>
-                                <p className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-sm font-medium text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                                    Klik "0" untuk Main Game! 🎮
-                                </p>
+                                <div className="absolute inset-0 bg-primary-500/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
                             </div>
 
-                            <div className="space-y-4 max-w-lg mx-auto text-center">
-                                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-                                    Halaman Tidak Ditemukan
-                                </h2>
-                                <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
-                                    Maaf, halaman yang Anda cari tidak dapat ditemukan. Mungkin sudah dihapus atau alamatnya salah.
-                                </p>
-                            </div>
-
-                            <div className="mt-12">
-                                <Link
-                                    href="/"
-                                    className="btn-primary px-8 py-3 text-lg rounded-2xl shadow-xl shadow-primary-500/20 hover:shadow-2xl hover:scale-105 transition-all"
-                                >
-                                    Kembali ke Beranda
-                                </Link>
-                            </div>
+                            {/* Right 4 */}
+                            <span className={`transform transition-all duration-1000 ease-in-out bg-gradient-to-br from-gray-300 to-gray-500 dark:from-gray-700 dark:to-gray-500 bg-clip-text text-transparent ${showGame ? 'translate-x-[100vw] -translate-y-[100vh] rotate-[45deg] opacity-0 scale-50' : 'translate-0'}`}>
+                                4
+                            </span>
                         </div>
-                    ) : (
-                        <div className="animate-scale-in">
-                            <div className="mb-8 flex items-center justify-between">
-                                <button
-                                    onClick={() => setShowGame(false)}
-                                    className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white flex items-center gap-2 transition-colors"
-                                >
-                                    <RotateCcw className="w-4 h-4" /> Kembali
-                                </button>
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Book Catcher</h2>
-                                <div className="w-20"></div> {/* Spacer */}
+
+                        <p className={`absolute -bottom-8 left-1/2 -translate-x-1/2 text-lg font-medium text-primary-500 transition-all duration-500 ${showGame ? 'translate-y-[50vh] opacity-0' : 'opacity-0 group-hover:opacity-100 translate-y-0'}`}>
+                            Klik "0" untuk Main! 🎮
+                        </p>
+                    </div>
+
+                    {/* Description Text */}
+                    <div className={`text-center max-w-lg mx-auto px-4 transition-all duration-1000 delay-100 ${showGame ? 'translate-y-[100vh] opacity-0 scale-50' : 'translate-0 opacity-100'}`}>
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                            Halaman Tidak Ditemukan
+                        </h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed mb-8">
+                            Maaf, halaman yang Anda cari tidak dapat ditemukan. Mungkin sudah dihapus atau alamatnya salah.
+                        </p>
+                        <Link
+                            href="/"
+                            className="btn-primary px-8 py-3 text-lg rounded-2xl shadow-xl shadow-primary-500/20 hover:shadow-2xl hover:scale-105 transition-all inline-flex items-center gap-2"
+                        >
+                            <Home className="w-5 h-5" />
+                            Kembali ke Beranda
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Game Layer - Fades in from center */}
+                <div className={`absolute inset-0 flex flex-col items-center justify-center z-30 transition-all duration-1000 ease-[cubic-bezier(0.4,0,0.2,1)] ${showGame ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-75 pointer-events-none translate-y-20 blur-sm'}`}>
+                    <div className="w-full max-w-2xl px-4">
+                        <div className="mb-6 flex items-center justify-between">
+                            <button
+                                onClick={() => setShowGame(false)}
+                                className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+                            >
+                                <div className="p-1.5 rounded-full bg-gray-100 dark:bg-gray-700 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/50 transition-colors">
+                                    <RotateCcw className="w-4 h-4" />
+                                </div>
+                                <span className="font-medium">Kembali</span>
+                            </button>
+
+                            <h2 className="text-2xl font-bold bg-gradient-to-r from-primary-500 to-blue-600 bg-clip-text text-transparent">
+                                Book Catcher
+                            </h2>
+
+                            <div className="w-24"></div> {/* Spacer for alignment */}
+                        </div>
+
+                        {/* Game Board */}
+                        <div className="relative w-full aspect-[4/3] bg-gradient-to-b from-blue-50/80 to-primary-50/80 dark:from-gray-800/80 dark:to-gray-900/80 backdrop-blur-xl rounded-3xl border border-white/50 dark:border-gray-700/50 shadow-2xl overflow-hidden cursor-none select-none touch-none ring-4 ring-white/20 dark:ring-black/20">
+
+                            {/* Background Pattern */}
+                            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+                                style={{ backgroundImage: 'radial-gradient(#6366f1 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
                             </div>
 
-                            {/* Game Area */}
-                            <div className="mb-8">
-                                <div
-                                    ref={gameAreaRef}
-                                    onPointerMove={handlePointerMove}
-                                    className="relative w-full aspect-[4/3] max-w-lg mx-auto bg-gradient-to-b from-blue-100/50 to-primary-100/50 dark:from-gray-800/50 dark:to-gray-800/30 rounded-2xl border-2 border-dashed border-primary-200 dark:border-gray-700 overflow-hidden cursor-none select-none touch-none"
-                                >
-                                    {/* Game HUD */}
-                                    {(gameStarted || gameOver) && (
-                                        <div className="absolute top-3 left-3 right-3 flex justify-between items-center z-20">
-                                            <div className="flex items-center gap-1 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
-                                                <BookOpen className="w-4 h-4 text-primary-500" />
-                                                <span className="text-sm font-bold text-gray-900 dark:text-white">{score}</span>
-                                            </div>
-                                            <div className="flex items-center gap-0.5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
-                                                {Array.from({ length: 3 }).map((_, i) => (
-                                                    <Heart key={i} className={`w-4 h-4 transition-all ${i < lives ? 'text-red-500 fill-red-500 scale-100' : 'text-gray-300 dark:text-gray-600 scale-75'}`} />
-                                                ))}
-                                            </div>
+                            <div
+                                ref={gameAreaRef}
+                                onPointerMove={handlePointerMove}
+                                className="absolute inset-0"
+                            >
+                                {/* Game HUD */}
+                                {(gameStarted || gameOver) && (
+                                    <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-20">
+                                        <div className="flex items-center gap-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur px-4 py-2 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+                                            <BookOpen className="w-5 h-5 text-primary-500" />
+                                            <span className="text-lg font-bold text-gray-900 dark:text-white">{score}</span>
                                         </div>
-                                    )}
+                                        <div className="flex items-center gap-1 bg-white/90 dark:bg-gray-900/90 backdrop-blur px-4 py-2 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+                                            {Array.from({ length: 3 }).map((_, i) => (
+                                                <Heart key={i} className={`w-5 h-5 transition-all duration-300 ${i < lives ? 'text-red-500 fill-red-500 scale-100' : 'text-gray-300 dark:text-gray-600 scale-75'}`} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
-                                    {/* Not started state */}
-                                    {!gameStarted && !gameOver && countdown === null && (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-                                            <div className="text-6xl mb-4 animate-bounce">📚</div>
-                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Book Catcher!</h3>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-[240px] mb-4">Gerakkan keranjang untuk menangkap buku yang jatuh. Hindari bom! 💣</p>
-                                            {highScore > 0 && (
-                                                <div className="flex items-center gap-1.5 text-xs text-yellow-600 dark:text-yellow-400 mb-3 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1.5 rounded-full">
-                                                    <Trophy className="w-3.5 h-3.5" />
-                                                    High Score: {highScore}
+                                {/* Not started state */}
+                                {!gameStarted && !gameOver && countdown === null && (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center z-10 animate-fade-in">
+                                        <div className="text-7xl mb-6 animate-bounce drop-shadow-xl">📚</div>
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Siap Bermain?</h3>
+                                        <p className="text-gray-500 dark:text-gray-400 max-w-[280px] text-center mb-8 leading-relaxed">
+                                            Gerakkan keranjang untuk menangkap buku. Awas bom! 💣
+                                        </p>
+
+                                        {highScore > 0 && (
+                                            <div className="flex items-center gap-2 text-sm text-yellow-700 dark:text-yellow-400 mb-6 bg-yellow-50 dark:bg-yellow-900/30 px-4 py-2 rounded-full border border-yellow-100 dark:border-yellow-900/50">
+                                                <Trophy className="w-4 h-4" />
+                                                <span className="font-semibold">Best: {highScore}</span>
+                                            </div>
+                                        )}
+
+                                        <button
+                                            onClick={startGame}
+                                            className="group relative overflow-hidden bg-primary-600 hover:bg-primary-500 text-white font-bold px-8 py-3.5 rounded-2xl shadow-lg shadow-primary-600/30 hover:shadow-xl hover:scale-105 transition-all duration-300"
+                                        >
+                                            <span className="relative z-10 flex items-center gap-2">
+                                                <span>Mulai Game</span>
+                                                <span className="group-hover:translate-x-1 transition-transform">🚀</span>
+                                            </span>
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Countdown */}
+                                {countdown !== null && (
+                                    <div className="absolute inset-0 flex items-center justify-center z-20 bg-white/20 dark:bg-black/20 backdrop-blur-sm">
+                                        <span className="text-9xl font-black text-primary-600 dark:text-primary-400 animate-ping" style={{ animationDuration: '0.7s' }}>
+                                            {countdown}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Game Over */}
+                                {gameOver && (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md transition-all duration-500 animate-fade-in">
+                                        <div className="text-center p-8">
+                                            <div className="text-6xl mb-4 animate-bounce">
+                                                {score > highScore - 1 && score > 0 ? '🏆' : '😅'}
+                                            </div>
+                                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Permainan Selesai!</h3>
+
+                                            <div className="my-6">
+                                                <p className="text-sm text-gray-500 uppercase tracking-wider font-medium mb-1">Skor Kamu</p>
+                                                <p className="text-5xl font-black text-primary-600 dark:text-primary-400 tabular-nums">{score}</p>
+                                            </div>
+
+                                            {score >= highScore && score > 0 && (
+                                                <div className="inline-flex items-center gap-2 text-sm font-bold text-yellow-600 dark:text-yellow-400 mb-8 bg-yellow-50 dark:bg-yellow-900/20 px-4 py-2 rounded-xl border border-yellow-100 dark:border-yellow-900/30 animate-pulse">
+                                                    <Sparkles className="w-4 h-4" /> Rekor Baru!
                                                 </div>
                                             )}
-                                            <button
-                                                onClick={startGame}
-                                                className="bg-primary-600 hover:bg-primary-500 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg shadow-primary-600/25 hover:shadow-xl hover:scale-105 transition-all text-sm"
-                                            >
-                                                🎮 Mulai Main
-                                            </button>
-                                        </div>
-                                    )}
 
-                                    {/* Countdown */}
-                                    {countdown !== null && (
-                                        <div className="absolute inset-0 flex items-center justify-center z-20">
-                                            <span className="text-7xl font-black text-primary-600 dark:text-primary-400 animate-ping" style={{ animationDuration: '0.7s' }}>
-                                                {countdown}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {/* Game Over */}
-                                    {gameOver && (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-black/30 backdrop-blur-sm rounded-2xl">
-                                            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-2xl text-center mx-4">
-                                                <div className="text-5xl mb-3">{score > highScore - 1 && score > 0 ? '🏆' : '📖'}</div>
-                                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Game Over!</h3>
-                                                <p className="text-3xl font-black text-primary-600 dark:text-primary-400 mb-1">{score}</p>
-                                                <p className="text-sm text-gray-500 mb-1">buku tertangkap</p>
-                                                {score >= highScore && score > 0 && (
-                                                    <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium flex items-center justify-center gap-1 mb-3">
-                                                        <Sparkles className="w-3.5 h-3.5" /> High Score Baru!
-                                                    </p>
-                                                )}
+                                            <div className="flex gap-3 justify-center">
+                                                <button
+                                                    onClick={() => setShowGame(false)}
+                                                    className="px-6 py-3 rounded-xl font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                                >
+                                                    Keluar
+                                                </button>
                                                 <button
                                                     onClick={startGame}
-                                                    className="bg-primary-600 hover:bg-primary-500 text-white font-semibold px-5 py-2 rounded-xl shadow-lg hover:scale-105 transition-all text-sm mt-2"
+                                                    className="px-6 py-3 rounded-xl font-bold text-white bg-primary-600 hover:bg-primary-500 shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-105"
                                                 >
-                                                    🔄 Main Lagi
+                                                    Main Lagi ↺
                                                 </button>
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
+                                )}
 
-                                    {/* Falling books */}
-                                    {books.map(book => (
-                                        <span
-                                            key={book.id}
-                                            className="absolute text-2xl md:text-3xl select-none pointer-events-none transition-none"
-                                            style={{
-                                                left: `${book.x}%`,
-                                                top: `${book.y}%`,
-                                                transform: `translate(-50%, -50%) rotate(${book.rotation}deg)`,
-                                            }}
-                                        >
-                                            {book.emoji}
-                                        </span>
-                                    ))}
+                                {/* Falling books */}
+                                {books.map(book => (
+                                    <span
+                                        key={book.id}
+                                        className="absolute text-3xl select-none pointer-events-none transition-none filter drop-shadow-md"
+                                        style={{
+                                            left: `${book.x}%`,
+                                            top: `${book.y}%`,
+                                            transform: `translate(-50%, -50%) rotate(${book.rotation}deg)`,
+                                        }}
+                                    >
+                                        {book.emoji}
+                                    </span>
+                                ))}
 
-                                    {/* Catch flash */}
-                                    {catchFlash && (
-                                        <div
-                                            className="absolute pointer-events-none animate-ping"
-                                            style={{ left: `${catchFlash.x}%`, top: `${catchFlash.y}%`, transform: 'translate(-50%, -50%)' }}
-                                        >
-                                            <span className="text-2xl">+1</span>
-                                        </div>
-                                    )}
+                                {/* Catch flash */}
+                                {catchFlash && (
+                                    <div
+                                        className="absolute pointer-events-none animate-ping font-bold text-green-500"
+                                        style={{ left: `${catchFlash.x}%`, top: `${catchFlash.y}%`, transform: 'translate(-50%, -50%)' }}
+                                    >
+                                        <span className="text-3xl">+1</span>
+                                    </div>
+                                )}
 
-                                    {/* Basket */}
-                                    {gameStarted && (
-                                        <div
-                                            className="absolute bottom-[6%] transition-[left] duration-75 ease-out pointer-events-none"
-                                            style={{ left: `${basketX}%`, transform: 'translateX(-50%)' }}
-                                        >
-                                            <div className="text-4xl md:text-5xl">🧺</div>
-                                        </div>
-                                    )}
-                                </div>
+                                {/* Basket */}
+                                {gameStarted && (
+                                    <div
+                                        className="absolute bottom-[8%] transition-[left] duration-75 ease-out pointer-events-none will-change-[left]"
+                                        style={{ left: `${basketX}%`, transform: 'translateX(-50%)' }}
+                                    >
+                                        <div className="text-5xl drop-shadow-xl filter">🧺</div>
+                                    </div>
+                                )}
                             </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
-                                <Link
-                                    href="/"
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-500 text-white font-semibold px-6 py-3 rounded-xl shadow-lg shadow-primary-600/20 hover:shadow-xl hover:scale-[1.02] transition-all"
-                                >
-                                    <Home className="w-5 h-5" />
-                                    Kembali ke Beranda
-                                </Link>
-                                <button
-                                    onClick={() => window.location.reload()}
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-semibold px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-[1.02] transition-all shadow-sm"
-                                >
-                                    <RotateCcw className="w-5 h-5" />
-                                    Coba Lagi
-                                </button>
-                            </div>
-
-
                         </div>
-                    )}
+
+                        {/* Footer Hints */}
+                        <div className="mt-6 text-center text-sm text-gray-400 dark:text-gray-500 font-medium animate-fade-in delay-500">
+                            Gunakan mouse atau sentuh layar untuk menggerakkan keranjang
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
