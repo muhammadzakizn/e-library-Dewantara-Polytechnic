@@ -10,13 +10,17 @@ import {
     User,
     BookOpen,
     ChevronDown,
+    ChevronRight,
     LogIn,
     LogOut,
     Moon,
     Sun,
     LayoutDashboard,
     Settings,
-    Link2
+    Link2,
+    Shield,
+    GraduationCap,
+    Lock
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -46,6 +50,8 @@ export default function Header() {
     const [user, setUser] = useState<SupabaseUser | null>(null);
     const [userRole, setUserRole] = useState<string | null>(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [showDashboardSub, setShowDashboardSub] = useState(false);
+    const [showMobileDashboardSub, setShowMobileDashboardSub] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
 
@@ -284,14 +290,58 @@ export default function Header() {
                                                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{userName}</p>
                                                 <p className="text-xs text-gray-500 truncate">{user.email}</p>
                                             </div>
-                                            <Link
-                                                href={dashboardLink}
-                                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                                onClick={() => setShowUserMenu(false)}
-                                            >
-                                                <LayoutDashboard className="w-4 h-4" />
-                                                Dashboard
-                                            </Link>
+                                            <div className="relative">
+                                                <button
+                                                    onClick={() => setShowDashboardSub(!showDashboardSub)}
+                                                    className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                                >
+                                                    <span className="flex items-center gap-3">
+                                                        <LayoutDashboard className="w-4 h-4" />
+                                                        Dashboard
+                                                    </span>
+                                                    <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-200 ${showDashboardSub ? 'rotate-90' : ''}`} />
+                                                </button>
+                                                {showDashboardSub && (
+                                                    <div className="py-1 border-t border-gray-100 dark:border-gray-700">
+                                                        {(userRole === 'admin' || userRole === 'dosen') ? (
+                                                            <Link
+                                                                href="/admin/dashboard"
+                                                                className="flex items-center gap-3 pl-11 pr-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                                                onClick={() => { setShowUserMenu(false); setShowDashboardSub(false); }}
+                                                            >
+                                                                <Shield className="w-4 h-4 text-blue-500" />
+                                                                Dashboard Admin
+                                                            </Link>
+                                                        ) : (
+                                                            <div className="flex items-center gap-3 pl-11 pr-4 py-2 text-sm cursor-not-allowed">
+                                                                <Shield className="w-4 h-4 text-gray-300 dark:text-gray-600" />
+                                                                <div>
+                                                                    <span className="text-gray-300 dark:text-gray-600">Dashboard Admin</span>
+                                                                    <p className="text-[10px] text-gray-400 dark:text-gray-500">Khusus admin/dosen</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {(userRole !== 'admin' && userRole !== 'dosen') ? (
+                                                            <Link
+                                                                href="/dashboard"
+                                                                className="flex items-center gap-3 pl-11 pr-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                                                onClick={() => { setShowUserMenu(false); setShowDashboardSub(false); }}
+                                                            >
+                                                                <GraduationCap className="w-4 h-4 text-green-500" />
+                                                                Dashboard Mahasiswa
+                                                            </Link>
+                                                        ) : (
+                                                            <div className="flex items-center gap-3 pl-11 pr-4 py-2 text-sm cursor-not-allowed">
+                                                                <GraduationCap className="w-4 h-4 text-gray-300 dark:text-gray-600" />
+                                                                <div>
+                                                                    <span className="text-gray-300 dark:text-gray-600">Dashboard Mahasiswa</span>
+                                                                    <p className="text-[10px] text-gray-400 dark:text-gray-500">Khusus mahasiswa</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
                                             {(userRole === 'admin' || userRole === 'dosen') ? (
                                                 <div className="flex items-start gap-3 px-4 py-2.5 text-sm cursor-not-allowed">
                                                     <Settings className="w-4 h-4 text-gray-300 dark:text-gray-600 mt-0.5" />
@@ -391,14 +441,58 @@ export default function Header() {
                     <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
                         {user ? (
                             <div className="space-y-1">
-                                <Link
-                                    href={dashboardLink}
-                                    className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    <LayoutDashboard className="w-4 h-4" />
-                                    Dashboard
-                                </Link>
+                                <div>
+                                    <button
+                                        onClick={() => setShowMobileDashboardSub(!showMobileDashboardSub)}
+                                        className="w-full flex items-center justify-between px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                    >
+                                        <span className="flex items-center gap-3">
+                                            <LayoutDashboard className="w-4 h-4" />
+                                            Dashboard
+                                        </span>
+                                        <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-200 ${showMobileDashboardSub ? 'rotate-90' : ''}`} />
+                                    </button>
+                                    {showMobileDashboardSub && (
+                                        <div className="ml-7 mt-1 space-y-0.5 border-l-2 border-gray-200 dark:border-gray-700 pl-3">
+                                            {(userRole === 'admin' || userRole === 'dosen') ? (
+                                                <Link
+                                                    href="/admin/dashboard"
+                                                    className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                >
+                                                    <Shield className="w-4 h-4 text-blue-500" />
+                                                    Dashboard Admin
+                                                </Link>
+                                            ) : (
+                                                <div className="flex items-center gap-3 px-3 py-2 text-sm cursor-not-allowed">
+                                                    <Shield className="w-4 h-4 text-gray-300 dark:text-gray-600" />
+                                                    <div>
+                                                        <span className="text-gray-300 dark:text-gray-600">Dashboard Admin</span>
+                                                        <p className="text-[10px] text-gray-400">Khusus admin/dosen</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {(userRole !== 'admin' && userRole !== 'dosen') ? (
+                                                <Link
+                                                    href="/dashboard"
+                                                    className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                >
+                                                    <GraduationCap className="w-4 h-4 text-green-500" />
+                                                    Dashboard Mahasiswa
+                                                </Link>
+                                            ) : (
+                                                <div className="flex items-center gap-3 px-3 py-2 text-sm cursor-not-allowed">
+                                                    <GraduationCap className="w-4 h-4 text-gray-300 dark:text-gray-600" />
+                                                    <div>
+                                                        <span className="text-gray-300 dark:text-gray-600">Dashboard Mahasiswa</span>
+                                                        <p className="text-[10px] text-gray-400">Khusus mahasiswa</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                                 {(userRole === 'admin' || userRole === 'dosen') ? (
                                     <div className="flex items-start gap-3 px-4 py-2.5 cursor-not-allowed">
                                         <Settings className="w-4 h-4 text-gray-300 dark:text-gray-600 mt-0.5" />
