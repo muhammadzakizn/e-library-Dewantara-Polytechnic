@@ -243,7 +243,7 @@ export default function NotFound() {
 
                             {/* Center 0 (Trigger) */}
                             <div className={`relative mx-2 md:mx-6 transform transition-all duration-700 ease-out z-10 ${showGame ? 'scale-[5] opacity-0 rotate-[180deg] blur-xl' : 'scale-100 group-hover:scale-110'}`}>
-                                <span className="bg-gradient-to-br from-primary-500 to-blue-600 bg-clip-text text-transparent animate-pulse">0</span>
+                                <span className="inline-block bg-gradient-to-br from-primary-500 to-blue-600 bg-clip-text text-transparent animate-bounce drop-shadow-2xl">0</span>
                                 {/* Hover Play Icon */}
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg border border-white/20">
@@ -259,9 +259,8 @@ export default function NotFound() {
                             </span>
                         </div>
 
-                        <p className={`absolute -bottom-8 left-1/2 -translate-x-1/2 text-lg font-medium text-primary-500 transition-all duration-500 ${showGame ? 'translate-y-[50vh] opacity-0' : 'opacity-0 group-hover:opacity-100 translate-y-0'}`}>
-                            Klik "0" untuk Main! 🎮
-                        </p>
+                        {/* Detaching Frame/Shockwave Effect */}
+                        <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] border-4 border-primary-500/50 rounded-full transition-all duration-700 ease-out pointer-events-none ${showGame ? 'scale-[2.5] opacity-0' : 'scale-0 opacity-0'}`}></div>
                     </div>
 
                     {/* Description Text */}
