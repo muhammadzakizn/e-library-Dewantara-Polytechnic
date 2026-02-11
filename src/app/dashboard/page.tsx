@@ -39,20 +39,34 @@ export default function DashboardPage() {
                     setUser(session.user);
                     setIsLoading(false);
                 } else {
-                    // No session — redirect to login
                     setUser(null);
                     setIsLoading(false);
                 }
             }
         );
 
-        // Also do an immediate check with getSession (cached, instant)
+        // Step 1: Instant load from cache
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (!mounted) return;
             if (session?.user) {
                 setUser(session.user);
             }
             setIsLoading(false);
+
+            // Step 2: Background refresh with fresh server data (with timeout)
+            if (session?.user) {
+                const timeout = setTimeout(() => { }, 5000);
+                Promise.race([
+                    supabase.auth.getUser(),
+                    new Promise((_, reject) => setTimeout(() => reject('timeout'), 5000))
+                ]).then((result: any) => {
+                    if (mounted && result?.data?.user) {
+                        setUser(result.data.user);
+                    }
+                }).catch(() => {
+                    // Timeout or error — keep cached data, no problem
+                }).finally(() => clearTimeout(timeout));
+            }
         }).catch(() => {
             if (mounted) setIsLoading(false);
         });

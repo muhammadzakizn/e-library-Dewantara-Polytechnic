@@ -193,9 +193,21 @@ export default function PengaturanPage() {
             (_event, session) => handleUser(session?.user)
         );
 
-        // Immediate check
+        // Immediate check from cache
         supabase.auth.getSession().then(({ data: { session } }) => {
             handleUser(session?.user);
+
+            // Background refresh with fresh server data (5s timeout)
+            if (session?.user) {
+                Promise.race([
+                    supabase.auth.getUser(),
+                    new Promise((_, reject) => setTimeout(() => reject('timeout'), 5000))
+                ]).then((result: any) => {
+                    if (mounted && result?.data?.user) {
+                        handleUser(result.data.user);
+                    }
+                }).catch(() => { });
+            }
         }).catch(() => {
             if (mounted) setIsLoading(false);
         });
