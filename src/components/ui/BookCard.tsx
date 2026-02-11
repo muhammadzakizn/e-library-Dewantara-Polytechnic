@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, Eye, Bookmark, Share2 } from 'lucide-react';
+import { Heart, Eye, Bookmark } from 'lucide-react';
 import CollectionDialog from '@/components/collections/CollectionDialog';
 import { Book } from '@/lib/api/books';
+import { createClient } from '@/lib/supabase/client';
 
 interface BookCardProps {
     id: string;
@@ -35,13 +36,76 @@ export default function BookCard({
 }: BookCardProps) {
     const categoryInfo = categoryLabels[category] || categoryLabels.buku_digital;
     const [isFavorite, setIsFavorite] = useState(false);
+    const [isFavLoading, setIsFavLoading] = useState(false);
     const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
 
-    const handleFavorite = (e: React.MouseEvent) => {
+    // Check if this book is already favorited on mount
+    useEffect(() => {
+        const checkFavorite = async () => {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data } = await supabase
+                .from('favorites')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('book_id', id)
+                .maybeSingle();
+
+            if (data) setIsFavorite(true);
+        };
+        checkFavorite();
+    }, [id]);
+
+    const handleFavorite = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        setIsFavorite(!isFavorite);
-        // TODO: Call Supabase API to toggle favorite
+        if (isFavLoading) return;
+
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            // Not logged in, redirect to login
+            window.location.href = '/login';
+            return;
+        }
+
+        setIsFavLoading(true);
+
+        try {
+            if (isFavorite) {
+                // Remove from favorites
+                await supabase
+                    .from('favorites')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('book_id', id);
+                setIsFavorite(false);
+            } else {
+                // Add to favorites
+                const bookData = {
+                    id, title, author,
+                    coverUrl: coverUrl || '',
+                    category,
+                    year: year || new Date().getFullYear(),
+                    views,
+                };
+                await supabase
+                    .from('favorites')
+                    .upsert({
+                        user_id: user.id,
+                        book_id: id,
+                        book_data: bookData,
+                    }, { onConflict: 'user_id,book_id' });
+                setIsFavorite(true);
+            }
+        } catch (err) {
+            console.error('Error toggling favorite:', err);
+        } finally {
+            setIsFavLoading(false);
+        }
     };
 
     const handleCollection = (e: React.MouseEvent) => {
@@ -100,9 +164,10 @@ export default function BookCard({
                                 : 'bg-white/90 dark:bg-gray-800/90 text-gray-500 hover:text-red-500 hover:bg-red-50'
                                 }`}
                             onClick={handleFavorite}
-                            title="Tambah ke Favorit"
+                            disabled={isFavLoading}
+                            title={isFavorite ? 'Hapus dari Favorit' : 'Tambah ke Favorit'}
                         >
-                            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+                            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''} ${isFavLoading ? 'animate-pulse' : ''}`} />
                         </button>
                         <button
                             className="w-8 h-8 rounded-full bg-white/90 dark:bg-gray-800/90 flex items-center justify-center shadow-lg text-gray-500 hover:text-blue-500 hover:bg-blue-50 transition-colors"

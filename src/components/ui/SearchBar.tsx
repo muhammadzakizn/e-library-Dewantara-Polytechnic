@@ -18,10 +18,10 @@ const searchPhrases = [
 ];
 
 const ACADEMIC_TERMS = [
-    'Manajemen Keuangan', 'Akuntansi Dasar', 'Sistem Informasi', 'Pemasaran Digital',
-    'Ekonomi Makro', 'Hukum Bisnis', 'Psikologi Industri', 'Algoritma Pemrograman',
-    'Metode Penelitian', 'Statistika Bisnis', 'Perpajakan', 'Audit Keuangan',
-    'Manajemen SDM', 'Komunikasi Bisnis', 'Etika Profesi', 'Machine Learning'
+    'Desain Multimedia', 'Teknik Sipil', 'Teknologi Pangan', 'Elektronika Digital',
+    'Arsitektur Modern', 'Metalurgi', 'Mesin Otomotif', 'Algoritma Pemrograman',
+    'Metode Penelitian', 'Fisika Teknik', 'Gambar Teknik', 'Struktur Bangunan',
+    'AutoCAD', 'Mikrokontroler', 'Konstruksi Baja', 'Machine Learning'
 ];
 
 export default function SearchBar({

@@ -195,8 +195,8 @@ export async function searchBooks(
  */
 export async function getTrendingBooks(language: string = 'id'): Promise<Book[]> {
     const queries = language === 'id' 
-        ? ['bisnis indonesia', 'manajemen', 'ekonomi', 'akuntansi indonesia']
-        : ['business', 'management', 'economics', 'technology'];
+        ? ['teknik sipil indonesia', 'arsitektur desain', 'elektronika digital', 'multimedia interaktif']
+        : ['engineering', 'architecture', 'electronics', 'technology'];
     
     const randomQuery = queries[Math.floor(Math.random() * queries.length)];
     const result = await searchGoogleBooks(randomQuery, { limit: 8, language });
@@ -223,35 +223,44 @@ export async function getBooksByCategory(
 
     const categoryQueries: Record<string, Record<string, string>> = {
         buku_digital: {
-            'Semua': 'teknik informatika komputer',
-            'Manajemen': 'manajemen bisnis ekonomi',
-            'Akuntansi': 'akuntansi keuangan perpajakan',
-            'Ekonomi': 'ekonomi pembangunan makro',
-            'Sistem Informasi': 'sistem informasi manajemen',
-            'Bisnis': 'administrasi bisnis kewirausahaan'
+            'Semua': 'buku teknik politeknik',
+            'Teknologi Rekayasa Multimedia': 'multimedia desain grafis animasi',
+            'Teknologi Rekayasa Pangan': 'teknologi pangan pengolahan makanan',
+            'Teknologi Rekayasa Metalurgi': 'metalurgi material logam',
+            'Arsitektur': 'arsitektur desain bangunan',
+            'Teknik Sipil': 'teknik sipil konstruksi',
+            'Teknik Elektronika': 'teknik elektronika mikrokontroler',
+            'Teknik Mesin dan Otomotif': 'teknik mesin otomotif'
         },
         jurnal: {
-            'Semua': 'jurnal ilmiah penelitian',
-            'Ekonomi': 'jurnal ekonomi pembangunan',
-            'Manajemen': 'jurnal manajemen bisnis',
-            'Akuntansi': 'jurnal akuntansi keuangan',
-            'Sistem Informasi': 'jurnal sistem informasi teknologi'
+            'Semua': 'jurnal ilmiah teknik politeknik',
+            'Teknologi Rekayasa Multimedia': 'jurnal multimedia teknologi informasi',
+            'Teknologi Rekayasa Pangan': 'jurnal teknologi pangan',
+            'Teknologi Rekayasa Metalurgi': 'jurnal metalurgi material',
+            'Arsitektur': 'jurnal arsitektur perancangan',
+            'Teknik Sipil': 'jurnal teknik sipil konstruksi',
+            'Teknik Elektronika': 'jurnal elektronika telekomunikasi',
+            'Teknik Mesin dan Otomotif': 'jurnal teknik mesin otomotif'
         },
         modul: {
-            'Semua': 'modul pembelajaran kuliah',
-            'Semester 1-2': 'dasar pemrograman manajemen',
-            'Semester 3-4': 'basis data akuntansi biaya',
-            'Semester 5-6': 'metodologi penelitian skripsi',
-            'Praktikum': 'panduan praktikum laboratorium'
+            'Semua': 'modul pembelajaran teknik',
+            'Semester 1-2': 'dasar teknik fisika matematika',
+            'Semester 3-4': 'pemrograman jaringan komputer',
+            'Semester 5-6': 'metodologi penelitian tugas akhir',
+            'Praktikum': 'panduan praktikum laboratorium teknik'
         },
         laporan_magang: {
-            'Semua': 'laporan penelitian tugas akhir',
-            '2024': 'research report 2024',
-            '2023': 'research report 2023',
-            '2022': 'research report 2022',
-            'Akuntansi': 'laporan tugas akhir akuntansi',
-            'Manajemen': 'laporan tugas akhir manajemen',
-            'Sistem Informasi': 'laporan tugas akhir sistem informasi'
+            'Semua': 'laporan magang kerja praktek',
+            '2024': 'internship report 2024 engineering',
+            '2023': 'internship report 2023 engineering',
+            '2022': 'internship report 2022 engineering',
+            'Teknologi Rekayasa Multimedia': 'laporan magang multimedia',
+            'Teknologi Rekayasa Pangan': 'laporan magang teknologi pangan',
+            'Teknologi Rekayasa Metalurgi': 'laporan magang metalurgi',
+            'Arsitektur': 'laporan magang arsitektur',
+            'Teknik Sipil': 'laporan magang teknik sipil',
+            'Teknik Elektronika': 'laporan magang elektronika',
+            'Teknik Mesin dan Otomotif': 'laporan magang teknik mesin'
         }
     };
     

@@ -245,20 +245,12 @@ export default function Header() {
                                                 Dashboard
                                             </Link>
                                             <Link
-                                                href="/dashboard/profil"
-                                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                                onClick={() => setShowUserMenu(false)}
-                                            >
-                                                <Settings className="w-4 h-4" />
-                                                Edit Profil
-                                            </Link>
-                                            <Link
                                                 href="/dashboard/pengaturan"
                                                 className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                                 onClick={() => setShowUserMenu(false)}
                                             >
-                                                <Link2 className="w-4 h-4" />
-                                                Pengaturan Akun
+                                                <Settings className="w-4 h-4" />
+                                                Pengaturan
                                             </Link>
                                             <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1">
                                                 <button
@@ -350,20 +342,12 @@ export default function Header() {
                                     Dashboard
                                 </Link>
                                 <Link
-                                    href="/dashboard/profil"
-                                    className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    <User className="w-4 h-4" />
-                                    Edit Profil
-                                </Link>
-                                <Link
                                     href="/dashboard/pengaturan"
                                     className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
                                     onClick={() => setIsMenuOpen(false)}
                                 >
-                                    <Link2 className="w-4 h-4" />
-                                    Pengaturan Akun
+                                    <Settings className="w-4 h-4" />
+                                    Pengaturan
                                 </Link>
                                 <button
                                     onClick={() => {

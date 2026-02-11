@@ -14,7 +14,8 @@ import {
     User,
     LogOut,
     Settings,
-    Loader2
+    Loader2,
+    FileText
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -104,12 +105,12 @@ export default function DashboardPage() {
                         {showProfileMenu && (
                             <div className="absolute right-0 top-12 w-56 card p-2 shadow-xl z-50">
                                 <Link
-                                    href="/dashboard/profil"
+                                    href="/dashboard/pengaturan"
                                     className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                                     onClick={() => setShowProfileMenu(false)}
                                 >
-                                    <User className="w-4 h-4 text-gray-500" />
-                                    <span className="text-sm text-gray-700 dark:text-gray-300">Edit Profil</span>
+                                    <Settings className="w-4 h-4 text-gray-500" />
+                                    <span className="text-sm text-gray-700 dark:text-gray-300">Pengaturan</span>
                                 </Link>
                                 <button
                                     onClick={handleLogout}
@@ -182,7 +183,7 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <Link
                                 href="/dashboard/unggah-laporan"
                                 className="card p-6 hover:shadow-hover transition-shadow group"
@@ -197,6 +198,25 @@ export default function DashboardPage() {
                                         </h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">
                                             Unggah laporan magang Anda
+                                        </p>
+                                    </div>
+                                </div>
+                            </Link>
+
+                            <Link
+                                href="/dashboard/laporan-saya"
+                                className="card p-6 hover:shadow-hover transition-shadow group"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center">
+                                        <FileText className="w-7 h-7 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-primary-900 dark:text-white group-hover:text-primary-500 transition-colors">
+                                            Laporan Saya
+                                        </h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            Kelola laporan yang diupload
                                         </p>
                                     </div>
                                 </div>
@@ -251,11 +271,11 @@ export default function DashboardPage() {
                                 )}
                                 <p className="text-xs text-gray-400 mt-1">{userEmail}</p>
                                 <Link
-                                    href="/dashboard/profil"
+                                    href="/dashboard/pengaturan"
                                     className="btn-secondary w-full mt-4 inline-flex items-center justify-center gap-2"
                                 >
-                                    <User className="w-4 h-4" />
-                                    Edit Profil
+                                    <Settings className="w-4 h-4" />
+                                    Pengaturan
                                 </Link>
                             </div>
                         </div>

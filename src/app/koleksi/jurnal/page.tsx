@@ -7,7 +7,7 @@ import BookCard from '@/components/ui/BookCard';
 import { fetchBooksAction } from '@/app/actions';
 import { Book } from '@/lib/api/books';
 
-const filters = ['Semua', 'Ekonomi', 'Manajemen', 'Akuntansi', 'Sistem Informasi'];
+const filters = ['Semua', 'Teknologi Rekayasa Multimedia', 'Teknologi Rekayasa Pangan', 'Teknologi Rekayasa Metalurgi', 'Arsitektur', 'Teknik Sipil', 'Teknik Elektronika', 'Teknik Mesin dan Otomotif'];
 const ITEMS_PER_PAGE = 12;
 
 export default function JurnalPage() {

@@ -7,7 +7,7 @@ import SearchBar from '@/components/ui/SearchBar';
 import { fetchBooksAction } from '@/app/actions';
 import { Book } from '@/lib/api/books';
 
-const filters = ['Semua', '2024', '2023', '2022', 'Akuntansi', 'Manajemen', 'Sistem Informasi'];
+const filters = ['Semua', '2024', '2023', '2022', 'Teknologi Rekayasa Multimedia', 'Teknologi Rekayasa Pangan', 'Teknologi Rekayasa Metalurgi', 'Arsitektur', 'Teknik Sipil', 'Teknik Elektronika', 'Teknik Mesin dan Otomotif'];
 const ITEMS_PER_PAGE = 10;
 
 export default function LaporanMagangPage() {
