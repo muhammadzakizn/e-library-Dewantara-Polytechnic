@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { BookOpen, FileText, GraduationCap, Briefcase, ArrowRight, Search as SearchIcon, Loader2 } from 'lucide-react';
 import SearchBar from '@/components/ui/SearchBar';
@@ -40,6 +40,18 @@ const categories = [
 ];
 
 export default function KoleksiPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen pt-24 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-primary-500 animate-spin" />
+            </div>
+        }>
+            <KoleksiContent />
+        </Suspense>
+    );
+}
+
+function KoleksiContent() {
     const searchParams = useSearchParams();
     const query = searchParams.get('q') || '';
 
