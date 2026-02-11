@@ -86,7 +86,7 @@ const faqs = [
     },
     {
         question: 'Bagaimana cara mendaftar?',
-        answer: 'Gunakan email kampus (@poltek-dewantara.ac.id) untuk mendaftar, atau hubungi admin perpustakaan.',
+        answer: 'Gunakan email kampus (@polidewa.ac.id) untuk mendaftar, atau hubungi admin perpustakaan.',
     },
     {
         question: 'Bisakah mengakses dari luar kampus?',
