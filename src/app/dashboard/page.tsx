@@ -23,87 +23,49 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 export default function DashboardPage() {
     const [user, setUser] = useState<SupabaseUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [showRetry, setShowRetry] = useState(false);
+
     const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     useEffect(() => {
         let mounted = true;
-        let isRedirecting = false;
         const supabase = createClient();
 
-        console.log('[Dashboard] Starting auth check...');
+        // Listen for auth state changes — this is reactive and never hangs
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (event, session) => {
+                if (!mounted) return;
 
-        // Safety net: if nothing loads in 5s, show retry button
-        const retryTimer = setTimeout(() => {
-            if (mounted && !isRedirecting) {
-                console.warn('[Dashboard] 5s timeout — showing retry button');
-                setShowRetry(true);
-            }
-        }, 5000);
-
-        // Timeout: force stop loading after 8s
-        const forceTimer = setTimeout(() => {
-            if (mounted && !isRedirecting) {
-                console.warn('[Dashboard] 8s timeout — force stopping loading');
-                setIsLoading(false);
-            }
-        }, 8000);
-
-        const checkUserRole = async (sessionUser: SupabaseUser | null) => {
-            console.log('[Dashboard] checkUserRole called, user:', sessionUser?.email ?? 'null');
-
-            if (!sessionUser) {
-                console.log('[Dashboard] No user found, stopping loading');
-                if (mounted) {
+                if (session?.user) {
+                    setUser(session.user);
+                    setIsLoading(false);
+                } else {
+                    // No session — redirect to login
                     setUser(null);
                     setIsLoading(false);
                 }
-                return;
             }
+        );
 
-            try {
-                console.log('[Dashboard] Fetching profile for user:', sessionUser.id);
-                const { data: profile, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', sessionUser.id)
-                    .single();
-
-                console.log('[Dashboard] Profile result:', profile, 'Error:', profileError);
-
-                if (profile?.role === 'admin' || profile?.role === 'dosen') {
-                    console.log('[Dashboard] Admin/dosen detected, redirecting...');
-                    isRedirecting = true;
-                    window.location.href = '/admin/dashboard';
-                    return;
-                }
-            } catch (err) {
-                console.error('[Dashboard] Error checking role:', err);
-            }
-
-            if (mounted && !isRedirecting) {
-                console.log('[Dashboard] Setting user and stopping loading');
-                setUser(sessionUser);
-                setIsLoading(false);
-            }
-        };
-
-        // Use getSession (cached, instant) instead of getUser (server call that hangs)
-        console.log('[Dashboard] Calling getSession...');
+        // Also do an immediate check with getSession (cached, instant)
         supabase.auth.getSession().then(({ data: { session } }) => {
-            console.log('[Dashboard] getSession returned, session:', session ? 'exists' : 'null');
-            if (mounted) {
-                checkUserRole(session?.user ?? null);
+            if (!mounted) return;
+            if (session?.user) {
+                setUser(session.user);
             }
-        }).catch((err) => {
-            console.error('[Dashboard] getSession error:', err);
+            setIsLoading(false);
+        }).catch(() => {
             if (mounted) setIsLoading(false);
         });
 
+        // Ultimate safety: force stop loading after 3 seconds no matter what
+        const safetyTimer = setTimeout(() => {
+            if (mounted) setIsLoading(false);
+        }, 3000);
+
         return () => {
             mounted = false;
-            clearTimeout(retryTimer);
-            clearTimeout(forceTimer);
+            subscription.unsubscribe();
+            clearTimeout(safetyTimer);
         };
     }, []);
 
@@ -124,15 +86,7 @@ export default function DashboardPage() {
             <div className="min-h-screen pt-24 pb-12 bg-[var(--background-secondary)] flex items-center justify-center">
                 <div className="text-center flex flex-col items-center">
                     <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-4" />
-                    <p className="text-gray-500 mb-4">Memuat dashboard...</p>
-                    {showRetry && (
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors animate-in fade-in"
-                        >
-                            Muat Ulang Halaman
-                        </button>
-                    )}
+                    <p className="text-gray-500">Memuat dashboard...</p>
                 </div>
             </div>
         );
