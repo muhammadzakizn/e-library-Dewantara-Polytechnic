@@ -76,14 +76,14 @@ Project ini dikembangkan oleh **Kelompok 2** - Semester 5 Politeknik Dewantara.
 
 **Anggota Tim:**
 
-1.  Fildzah Hashilah N
-2.  Muhammad Zaky Z N
+1.  Fildzah Hashilah Nur
+2.  Muhammad Zaky Zikra Nur
 3.  Nurheni
 4.  Fitriany
 5.  Hardiani
 6.  Nurul Hikmah
 7.  Lusiana
-8.  Ainin (UAS)
+8.  Ainin
 9.  Muliani
 10. Sazkia
 11. Rafia
@@ -95,4 +95,4 @@ Project ini dikembangkan oleh **Kelompok 2** - Semester 5 Politeknik Dewantara.
 *(Catatan: Daftar ini mencakup anggota yang mengikuti UAS & UTS)*
 
 ---
-© 2024 Politeknik Dewantara. All Rights Reserved.
+© 2026 Politeknik Dewantara. All Rights Reserved.
