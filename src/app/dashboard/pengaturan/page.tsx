@@ -278,8 +278,8 @@ export default function PengaturanPage() {
             } else {
                 setCustomAvatarUrl(publicUrl);
                 setMessage({ type: 'success', text: 'Foto profil berhasil diperbarui!' });
-                const { data: { user: updatedUser } } = await supabase.auth.getUser();
-                setUser(updatedUser);
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) setUser(session.user);
             }
             setShowCropModal(false);
             setImageSrc(null);
@@ -309,8 +309,8 @@ export default function PengaturanPage() {
             } else {
                 setCustomAvatarUrl(null);
                 setMessage({ type: 'success', text: 'Foto profil dikembalikan ke default' });
-                const { data: { user: updatedUser } } = await supabase.auth.getUser();
-                setUser(updatedUser);
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) setUser(session.user);
             }
         } catch (err: any) {
             setMessage({ type: 'error', text: err.message });
@@ -331,8 +331,8 @@ export default function PengaturanPage() {
             setMessage({ type: 'error', text: error.message });
         } else {
             setMessage({ type: 'success', text: 'Profil berhasil diperbarui!' });
-            const { data: { user: updatedUser } } = await supabase.auth.getUser();
-            setUser(updatedUser);
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) setUser(session.user);
         }
         setIsSaving(false);
     };
@@ -394,8 +394,8 @@ export default function PengaturanPage() {
                 setMessage({ type: 'error', text: `Gagal memutuskan tautan: ${error.message}` });
             } else {
                 setMessage({ type: 'success', text: `Akun ${provider} berhasil diputuskan tautannya.` });
-                const { data: { user: updatedUser } } = await supabase.auth.getUser();
-                setUser(updatedUser);
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) setUser(session.user);
             }
         } catch (err: any) {
             setMessage({ type: 'error', text: err.message || 'Terjadi kesalahan' });

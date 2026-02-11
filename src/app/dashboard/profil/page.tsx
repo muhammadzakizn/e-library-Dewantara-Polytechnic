@@ -258,8 +258,8 @@ export default function ProfilPage() {
                 setMessage({ type: 'success', text: 'Foto profil berhasil diperbarui!' });
 
                 // Refresh user
-                const { data: { user: updatedUser } } = await supabase.auth.getUser();
-                setUser(updatedUser);
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) setUser(session.user);
             }
 
             setShowCropModal(false);
@@ -303,8 +303,8 @@ export default function ProfilPage() {
             } else {
                 setCustomAvatarUrl(null);
                 setMessage({ type: 'success', text: 'Foto profil dikembalikan ke default' });
-                const { data: { user: updatedUser } } = await supabase.auth.getUser();
-                setUser(updatedUser);
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) setUser(session.user);
             }
         } catch (err: any) {
             setMessage({ type: 'error', text: err.message });
@@ -332,8 +332,8 @@ export default function ProfilPage() {
             setMessage({ type: 'error', text: error.message });
         } else {
             setMessage({ type: 'success', text: 'Profil berhasil diperbarui!' });
-            const { data: { user: updatedUser } } = await supabase.auth.getUser();
-            setUser(updatedUser);
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) setUser(session.user);
         }
 
         setIsSaving(false);
