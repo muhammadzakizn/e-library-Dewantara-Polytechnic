@@ -292,14 +292,24 @@ export default function Header() {
                                                 <LayoutDashboard className="w-4 h-4" />
                                                 Dashboard
                                             </Link>
-                                            <Link
-                                                href="/dashboard/pengaturan"
-                                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                                onClick={() => setShowUserMenu(false)}
-                                            >
-                                                <Settings className="w-4 h-4" />
-                                                Pengaturan
-                                            </Link>
+                                            {(userRole === 'admin' || userRole === 'dosen') ? (
+                                                <div className="flex items-start gap-3 px-4 py-2.5 text-sm cursor-not-allowed">
+                                                    <Settings className="w-4 h-4 text-gray-300 dark:text-gray-600 mt-0.5" />
+                                                    <div>
+                                                        <span className="text-gray-300 dark:text-gray-600">Pengaturan</span>
+                                                        <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">Khusus akun mahasiswa</p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <Link
+                                                    href="/dashboard/pengaturan"
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                                    onClick={() => setShowUserMenu(false)}
+                                                >
+                                                    <Settings className="w-4 h-4" />
+                                                    Pengaturan
+                                                </Link>
+                                            )}
                                             <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1">
                                                 <button
                                                     onClick={handleLogout}
@@ -382,21 +392,31 @@ export default function Header() {
                         {user ? (
                             <div className="space-y-1">
                                 <Link
-                                    href="/dashboard"
+                                    href={dashboardLink}
                                     className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
                                     onClick={() => setIsMenuOpen(false)}
                                 >
                                     <LayoutDashboard className="w-4 h-4" />
                                     Dashboard
                                 </Link>
-                                <Link
-                                    href="/dashboard/pengaturan"
-                                    className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    <Settings className="w-4 h-4" />
-                                    Pengaturan
-                                </Link>
+                                {(userRole === 'admin' || userRole === 'dosen') ? (
+                                    <div className="flex items-start gap-3 px-4 py-2.5 cursor-not-allowed">
+                                        <Settings className="w-4 h-4 text-gray-300 dark:text-gray-600 mt-0.5" />
+                                        <div>
+                                            <span className="text-gray-300 dark:text-gray-600">Pengaturan</span>
+                                            <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">Khusus akun mahasiswa</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <Link
+                                        href="/dashboard/pengaturan"
+                                        className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        <Settings className="w-4 h-4" />
+                                        Pengaturan
+                                    </Link>
+                                )}
                                 <button
                                     onClick={() => {
                                         handleLogout();
