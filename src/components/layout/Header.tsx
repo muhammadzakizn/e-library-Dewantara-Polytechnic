@@ -174,13 +174,20 @@ export default function Header() {
             <div className="container-custom">
                 <div className="flex items-center justify-between h-20">
                     {/* Logo */}
+                    {/* Logo */}
                     <Link href="/" className="flex items-center gap-3 group">
-                        <img src="/logo-poltek.png" alt="Politeknik Dewantara" className="w-12 h-12 object-contain" />
+                        <div className="relative w-10 h-10 sm:w-12 sm:h-12 transition-transform duration-300 group-hover:scale-110">
+                            <img
+                                src="/logo-poltek.png"
+                                alt="Politeknik Dewantara"
+                                className="w-full h-full object-contain filter drop-shadow-sm"
+                            />
+                        </div>
                         <div className="hidden sm:block">
-                            <h1 className="text-lg font-bold text-primary-900 dark:text-white leading-tight">
+                            <h1 className="text-lg font-bold text-primary-900 dark:text-white leading-tight tracking-tight">
                                 E-Library
                             </h1>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium tracking-wide">
                                 Politeknik Dewantara
                             </p>
                         </div>
