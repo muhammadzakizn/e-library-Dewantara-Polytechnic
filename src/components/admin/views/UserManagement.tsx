@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
+import UserModal from '../modals/UserModal';
 
 type Profile = {
     id: string;
@@ -26,6 +27,11 @@ export default function UserManagement() {
     const [users, setUsers] = useState<Profile[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+    const [selectedUser, setSelectedUser] = useState<Profile | undefined>(undefined);
 
     // Auth
     const supabase = createClient();
@@ -72,8 +78,8 @@ export default function UserManagement() {
                     <button
                         onClick={() => setActiveTab('mahasiswa')}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'mahasiswa'
-                                ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm'
-                                : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
+                            ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
                             }`}
                     >
                         <GraduationCap className="w-4 h-4" />
@@ -82,8 +88,8 @@ export default function UserManagement() {
                     <button
                         onClick={() => setActiveTab('admin')}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'admin'
-                                ? 'bg-white dark:bg-gray-700 text-purple-600 shadow-sm'
-                                : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
+                            ? 'bg-white dark:bg-gray-700 text-purple-600 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
                             }`}
                     >
                         <Shield className="w-4 h-4" />
@@ -104,7 +110,14 @@ export default function UserManagement() {
                         className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                     />
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-lg shadow-blue-600/20">
+                <button
+                    onClick={() => {
+                        setModalMode('create');
+                        setSelectedUser(undefined);
+                        setIsModalOpen(true);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-lg shadow-blue-600/20"
+                >
                     <Plus className="w-4 h-4" />
                     Tambah {activeTab === 'admin' ? 'Admin/Dosen' : 'Mahasiswa'}
                 </button>
@@ -180,7 +193,14 @@ export default function UserManagement() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                                                <button
+                                                    onClick={() => {
+                                                        setModalMode('edit');
+                                                        setSelectedUser(user);
+                                                        setIsModalOpen(true);
+                                                    }}
+                                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                >
                                                     <Pencil className="w-4 h-4" />
                                                 </button>
                                                 <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
@@ -195,6 +215,19 @@ export default function UserManagement() {
                     </table>
                 </div>
             </div>
-        </div>
+
+
+            <UserModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={() => {
+                    fetchUsers();
+                    setIsModalOpen(false);
+                }}
+                mode={modalMode}
+                userToEdit={selectedUser}
+                initialRole={activeTab === 'mahasiswa' ? 'mahasiswa' : 'dosen'}
+            />
+        </div >
     );
 }
