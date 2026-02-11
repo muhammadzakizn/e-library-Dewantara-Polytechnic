@@ -26,13 +26,18 @@ export default function UnggahLaporanPage() {
     useEffect(() => {
         const supabase = createClient();
         const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                router.push('/login');
-                return;
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    router.push('/login');
+                    return;
+                }
+                setUser(user);
+            } catch (err) {
+                console.error('Error fetching user:', err);
+            } finally {
+                setIsLoading(false);
             }
-            setUser(user);
-            setIsLoading(false);
         };
         getUser();
     }, [router]);

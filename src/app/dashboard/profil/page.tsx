@@ -134,17 +134,22 @@ export default function ProfilPage() {
         const supabase = createClient();
 
         const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                router.push('/login');
-                return;
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    router.push('/login');
+                    return;
+                }
+                setUser(user);
+                setFullName(user.user_metadata?.full_name || '');
+                setNim(user.user_metadata?.nim || '');
+                setProdi(user.user_metadata?.program_studi || '');
+                setCustomAvatarUrl(user.user_metadata?.custom_avatar_url || null);
+            } catch (err) {
+                console.error('Error fetching user:', err);
+            } finally {
+                setIsLoading(false);
             }
-            setUser(user);
-            setFullName(user.user_metadata?.full_name || '');
-            setNim(user.user_metadata?.nim || '');
-            setProdi(user.user_metadata?.program_studi || '');
-            setCustomAvatarUrl(user.user_metadata?.custom_avatar_url || null);
-            setIsLoading(false);
         };
 
         getUser();

@@ -173,17 +173,37 @@ export default function PengaturanPage() {
     useEffect(() => {
         const supabase = createClient();
         const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                router.push('/login');
-                return;
+            try {
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                if (authError) throw authError;
+
+                if (!user) {
+                    router.push('/login');
+                    return;
+                }
+
+                // Check if admin/dosen — redirect them
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile?.role === 'admin' || profile?.role === 'dosen') {
+                    window.location.href = '/admin/dashboard';
+                    return;
+                }
+
+                setUser(user);
+                setFullName(user.user_metadata?.full_name || '');
+                setNim(user.user_metadata?.nim || '');
+                setProdi(user.user_metadata?.program_studi || '');
+                setCustomAvatarUrl(user.user_metadata?.custom_avatar_url || null);
+                setIsLoading(false);
+            } catch (error) {
+                console.error('Error in getUser:', error);
+                setIsLoading(false);
             }
-            setUser(user);
-            setFullName(user.user_metadata?.full_name || '');
-            setNim(user.user_metadata?.nim || '');
-            setProdi(user.user_metadata?.program_studi || '');
-            setCustomAvatarUrl(user.user_metadata?.custom_avatar_url || null);
-            setIsLoading(false);
         };
         getUser();
     }, [router]);

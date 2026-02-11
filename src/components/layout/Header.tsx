@@ -116,7 +116,7 @@ export default function Header() {
         setUser(null);
         setUserRole(null);
         setShowUserMenu(false);
-        router.push('/');
+        window.location.href = '/';
     };
 
     const isActive = (href: string) => {

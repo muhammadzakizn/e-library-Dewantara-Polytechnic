@@ -39,27 +39,33 @@ export default function LaporanSayaPage() {
     }, []);
 
     const fetchLaporan = async () => {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        try {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
 
-        if (!user) {
-            router.push('/login');
-            return;
+            if (!user) {
+                router.push('/login');
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('laporan_magang')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                setError('Gagal memuat data laporan. Pastikan tabel "laporan_magang" sudah dibuat di Supabase.');
+                console.error(error);
+            } else {
+                setLaporanList(data || []);
+            }
+        } catch (err) {
+            console.error('Error fetching laporan:', err);
+            setError('Gagal memuat data. Silakan muat ulang halaman.');
+        } finally {
+            setIsLoading(false);
         }
-
-        const { data, error } = await supabase
-            .from('laporan_magang')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
-
-        if (error) {
-            setError('Gagal memuat data laporan. Pastikan tabel "laporan_magang" sudah dibuat di Supabase.');
-            console.error(error);
-        } else {
-            setLaporanList(data || []);
-        }
-        setIsLoading(false);
     };
 
     const handleDelete = async (id: string, filePath: string) => {
