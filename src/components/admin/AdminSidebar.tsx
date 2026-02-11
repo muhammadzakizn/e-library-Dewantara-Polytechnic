@@ -4,11 +4,11 @@ import { useState } from 'react';
 import {
     LayoutDashboard, Users, BookOpen, Settings,
     ChevronRight, LogOut, Pin, PinOff, Shield,
-    GraduationCap, ClipboardCheck, Library, GripVertical
+    GraduationCap, ClipboardCheck, Library, GripVertical, School
 } from 'lucide-react';
 import Image from 'next/image';
 
-export type AdminSection = 'beranda' | 'pengguna' | 'pustaka' | 'pengaturan';
+export type AdminSection = 'beranda' | 'akademik' | 'pengguna' | 'pustaka' | 'pengaturan';
 
 interface AdminSidebarProps {
     activeSection: AdminSection;
@@ -34,6 +34,7 @@ export default function AdminSidebar({
 
     const sidebarItems = [
         { key: 'beranda', label: 'Beranda', icon: LayoutDashboard },
+        { key: 'akademik', label: 'Manajemen Jurusan', icon: School },
         { key: 'pengguna', label: 'Kelola Pengguna', icon: Users },
         { key: 'pustaka', label: 'Kelola Pustaka', icon: Library },
         { key: 'pengaturan', label: 'Pengaturan Sistem', icon: Settings },

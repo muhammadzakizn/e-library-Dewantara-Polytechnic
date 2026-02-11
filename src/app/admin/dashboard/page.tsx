@@ -12,6 +12,7 @@ import DashboardHome from '@/components/admin/views/DashboardHome';
 import UserManagement from '@/components/admin/views/UserManagement';
 import LibraryManagement from '@/components/admin/views/LibraryManagement';
 import SystemSettings from '@/components/admin/views/SystemSettings';
+import DepartmentsManagement from '@/components/admin/views/DepartmentsManagement';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -87,6 +88,8 @@ export default function AdminDashboard() {
         switch (activeSection) {
             case 'beranda':
                 return <DashboardHome stats={stats} />;
+            case 'akademik':
+                return <DepartmentsManagement />;
             case 'pengguna':
                 return <UserManagement />;
             case 'pustaka':
@@ -119,8 +122,9 @@ export default function AdminDashboard() {
                 <AdminHeader
                     title={
                         activeSection === 'beranda' ? 'Dashboard Overview' :
-                            activeSection === 'pengguna' ? 'Manajemen Pengguna' :
-                                activeSection === 'pustaka' ? 'Pustaka Digital' : 'Pengaturan'
+                            activeSection === 'akademik' ? 'Manajemen Akademik' :
+                                activeSection === 'pengguna' ? 'Manajemen Pengguna' :
+                                    activeSection === 'pustaka' ? 'Pustaka Digital' : 'Pengaturan'
                     }
                     user={currentProfile}
                 />

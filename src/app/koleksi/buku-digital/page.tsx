@@ -8,16 +8,9 @@ import BookCard from '@/components/ui/BookCard';
 import FloatingFilter from '@/components/ui/FloatingFilter';
 import { fetchBooksAction } from '@/app/actions';
 import { Book } from '@/lib/api/books';
+import { getDepartments } from '@/app/actions/departments';
 
-const categories = [
-    { label: 'Teknologi Rekayasa Multimedia', value: 'Teknologi Rekayasa Multimedia' },
-    { label: 'Teknologi Rekayasa Pangan', value: 'Teknologi Rekayasa Pangan' },
-    { label: 'Teknologi Rekayasa Metalurgi', value: 'Teknologi Rekayasa Metalurgi' },
-    { label: 'Arsitektur', value: 'Arsitektur' },
-    { label: 'Teknik Sipil', value: 'Teknik Sipil' },
-    { label: 'Teknik Elektronika', value: 'Teknik Elektronika' },
-    { label: 'Teknik Mesin dan Otomotif', value: 'Teknik Mesin dan Otomotif' },
-];
+
 
 const ITEMS_PER_PAGE = 12;
 
@@ -26,7 +19,14 @@ function BukuDigitalContent() {
     const [books, setBooks] = useState<Book[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [categories, setCategories] = useState<{ label: string; value: string }[]>([]);
     const [totalItems, setTotalItems] = useState(0);
+
+    useEffect(() => {
+        getDepartments().then(depts => {
+            setCategories(depts.map(d => ({ label: d.name, value: d.name })));
+        });
+    }, []);
 
     const filter = searchParams.get('filter') || 'Semua';
     const sort = (searchParams.get('sort') as 'relevance' | 'newest') || 'relevance';

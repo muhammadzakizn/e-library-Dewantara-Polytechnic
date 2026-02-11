@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { getDepartments } from '@/app/actions/departments';
 
 // -------- Image processing utilities --------
 
@@ -129,6 +130,11 @@ export default function ProfilPage() {
 
     // Custom avatar (not from Google)
     const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(null);
+    const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+
+    useEffect(() => {
+        getDepartments().then(setDepartments);
+    }, []);
 
     useEffect(() => {
         let mounted = true;
@@ -520,10 +526,9 @@ export default function ProfilPage() {
                                     onChange={(e) => setProdi(e.target.value)}
                                 >
                                     <option value="">Pilih program studi</option>
-                                    <option value="D3 Akuntansi">D3 Akuntansi</option>
-                                    <option value="D3 Manajemen">D3 Manajemen</option>
-                                    <option value="D3 Sistem Informasi">D3 Sistem Informasi</option>
-                                    <option value="D4 Bisnis Digital">D4 Bisnis Digital</option>
+                                    {departments.map((dept) => (
+                                        <option key={dept.id} value={dept.name}>{dept.name}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>

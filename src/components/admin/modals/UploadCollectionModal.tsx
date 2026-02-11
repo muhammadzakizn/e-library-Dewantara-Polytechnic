@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { getDepartments } from '@/app/actions/departments';
 import { X, Upload, Loader2, Image as ImageIcon, FileText } from 'lucide-react';
+
 
 interface UploadCollectionModalProps {
     isOpen: boolean;
@@ -25,7 +27,13 @@ export default function UploadCollectionModal({ isOpen, onClose, onSuccess, type
     });
     const [coverFile, setCoverFile] = useState<File | null>(null);
     const [docFile, setDocFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
     const [errorMsg, setErrorMsg] = useState('');
+
+    useEffect(() => {
+        getDepartments().then(setDepartments);
+    }, []);
 
     const supabase = createClient();
 
@@ -231,13 +239,9 @@ export default function UploadCollectionModal({ isOpen, onClose, onSuccess, type
                                         className="input w-full"
                                     >
                                         <option value="">Pilih Jurusan</option>
-                                        <option value="Teknologi Rekayasa Multimedia">Teknologi Rekayasa Multimedia</option>
-                                        <option value="Teknologi Rekayasa Pangan">Teknologi Rekayasa Pangan</option>
-                                        <option value="Teknologi Rekayasa Metalurgi">Teknologi Rekayasa Metalurgi</option>
-                                        <option value="Arsitektur">Arsitektur</option>
-                                        <option value="Teknik Sipil">Teknik Sipil</option>
-                                        <option value="Teknik Elektronika">Teknik Elektronika</option>
-                                        <option value="Teknik Mesin dan Otomotif">Teknik Mesin dan Otomotif</option>
+                                        {departments.map((dept) => (
+                                            <option key={dept.id} value={dept.name}>{dept.name}</option>
+                                        ))}
                                     </select>
                                 ) : (
                                     <input

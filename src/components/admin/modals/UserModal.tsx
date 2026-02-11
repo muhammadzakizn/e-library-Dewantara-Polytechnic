@@ -14,6 +14,10 @@ type UserModalProps = {
     initialRole?: 'admin' | 'dosen' | 'mahasiswa';
 };
 
+import { getDepartments } from '@/app/actions/departments';
+
+type Department = { id: string; name: string; code: string | null };
+
 export default function UserModal({
     isOpen,
     onClose,
@@ -23,6 +27,12 @@ export default function UserModal({
     initialRole = 'mahasiswa'
 }: UserModalProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [departments, setDepartments] = useState<Department[]>([]);
+
+    useEffect(() => {
+        getDepartments().then(setDepartments);
+    }, []);
+
     const [formData, setFormData] = useState({
         email: '',
         full_name: '',
@@ -151,8 +161,8 @@ export default function UserModal({
                                     type="button"
                                     onClick={() => setFormData({ ...formData, role: 'mahasiswa' })}
                                     className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${formData.role === 'mahasiswa'
-                                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-600'
-                                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300'
+                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-600'
+                                        : 'border-gray-200 dark:border-gray-700 hover:border-blue-300'
                                         }`}
                                 >
                                     <GraduationCap className="w-6 h-6" />
@@ -162,8 +172,8 @@ export default function UserModal({
                                     type="button"
                                     onClick={() => setFormData({ ...formData, role: 'dosen' })}
                                     className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${formData.role === 'dosen'
-                                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-600'
-                                            : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+                                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-600'
+                                        : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
                                         }`}
                                 >
                                     <Shield className="w-6 h-6" />
@@ -248,11 +258,9 @@ export default function UserModal({
                                 className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-500 outline-none"
                             >
                                 <option value="">Pilih Program Studi</option>
-                                <option value="Teknologi Rekayasa Multimedia">Teknologi Rekayasa Multimedia</option>
-                                <option value="Teknologi Rekayasa Komputer">Teknologi Rekayasa Komputer</option>
-                                <option value="Teknologi Rekayasa Internet">Teknologi Rekayasa Internet</option>
-                                <option value="Bisnis Digital">Bisnis Digital</option>
-                                <option value="Rekayasa Keamanan Siber">Rekayasa Keamanan Siber</option>
+                                {departments.map((dept) => (
+                                    <option key={dept.id} value={dept.name}>{dept.name}</option>
+                                ))}
                             </select>
                         </div>
                     </form>
