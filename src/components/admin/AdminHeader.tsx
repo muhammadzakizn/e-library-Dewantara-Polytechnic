@@ -104,8 +104,16 @@ export default function AdminHeader({
                     <span className="capitalize font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2.5 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800">
                         {user?.role || 'Admin'}
                     </span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
-                    <span className="font-medium text-gray-600 dark:text-gray-300">{user?.program_studi || 'Teknologi Rekayasa Multimedia'}</span>
+
+                    {/* Only show department for Dosen/Mahasiswa */}
+                    {(user?.role === 'dosen' || user?.role === 'mahasiswa') && user?.program_studi && (
+                        <>
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
+                            <span className="font-medium text-gray-600 dark:text-gray-300">
+                                {user.program_studi}
+                            </span>
+                        </>
+                    )}
                 </div>
             </div>
 
