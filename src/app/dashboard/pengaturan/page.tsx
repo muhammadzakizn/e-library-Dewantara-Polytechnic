@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Cropper from 'react-easy-crop';
@@ -135,6 +135,18 @@ const sidebarItems: { id: SettingsSection; label: string; icon: React.ReactNode;
 // -------- Component --------
 
 export default function PengaturanPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen pt-24 pb-12 bg-[var(--background-secondary)] flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-primary-500 animate-spin" />
+            </div>
+        }>
+            <PengaturanContent />
+        </Suspense>
+    );
+}
+
+function PengaturanContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [user, setUser] = useState<SupabaseUser | null>(null);
